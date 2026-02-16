@@ -92,7 +92,7 @@ function gerarCodigo() {
     return "OP" + Date.now();
 }
 
-window.cadastrar = async function () {
+function.cadastrar = async function () {
     let nome = document.getElementById("nomeCadastro").value;
     let validade = document.getElementById("validadeCadastro").value;
 
@@ -146,7 +146,7 @@ function atualizarLista() {
     }
 }
 
-window.editar = async function (id) {
+function.editar = async function (id) {
     let op = operadores[id];
 
     let novoNome = prompt("Novo nome:", op.nome);
@@ -161,13 +161,13 @@ window.editar = async function (id) {
     });
 };
 
-window.excluirOperador = async function (id) {
+function.excluirOperador = async function (id) {
     if (confirm("Excluir operador?")) {
         await deleteDoc(doc(db, "funcionarios", id));
     }
 };
 
-window.validar = function (codigo) {
+function.validar = function (codigo) {
     let op = Object.values(operadores).find(o => o.codigo === codigo);
 
     if (!op) {
@@ -195,12 +195,12 @@ window.validar = function (codigo) {
     }
 };
 
-window.irOperacao = function () {
+function.irOperacao = function () {
     document.getElementById("operacao").style.display = "block";
     document.getElementById("admin").style.display = "none";
 };
 
-window.loginAdmin = function () {
+function.loginAdmin = function () {
     let senha = prompt("Senha admin:");
     if (senha === senhaAdmin) {
         document.getElementById("admin").style.display = "block";
@@ -225,7 +225,7 @@ onSnapshot(funcionariosRef, (snapshot) => {
     atualizarLista();
 });
 
-window.onload = function () {
+function.onload = function () {
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
     if (codigo) validar(codigo);
@@ -236,4 +236,5 @@ window.onload = function () {
 
 </body>
 </html>
+
 
