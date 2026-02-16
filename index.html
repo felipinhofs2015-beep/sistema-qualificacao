@@ -8,53 +8,17 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-body{
-  font-family: Arial;
-  margin:0;
-  text-align:center;
-}
-
-header{
-  background:#2c3e50;
-  color:white;
-  padding:15px;
-}
-
-button{
-  padding:10px 20px;
-  margin:5px;
-  cursor:pointer;
-}
-
-.tela{
-  display:none;
-  padding:30px;
-}
-
-#operacao{
-  display:block;
-}
-
-#resultado{
-  margin-top:30px;
-  padding:40px;
-  border-radius:15px;
-  color:white;
-  display:none;
-}
-
-.apto{
-  background:#27ae60;
-}
-
-.naoapto{
-  background:#c0392b;
-}
-
-img{
-  width:150px;
-  border-radius:10px;
-}
+body{font-family:Arial;margin:0;text-align:center}
+header{background:#2c3e50;color:white;padding:15px}
+button{padding:6px 12px;margin:3px;cursor:pointer}
+.tela{display:none;padding:20px}
+#operacao{display:block}
+#resultado{margin-top:30px;padding:40px;border-radius:15px;color:white;display:none}
+.apto{background:#27ae60}
+.naoapto{background:#c0392b}
+table{width:100%;margin-top:20px;border-collapse:collapse}
+td,th{border:1px solid #ccc;padding:8px}
+canvas{margin-top:5px}
 </style>
 </head>
 <body>
@@ -67,33 +31,38 @@ img{
 
 <div id="operacao" class="tela">
 
-<h2>Leitura do Operador</h2>
+<h2>Leitura</h2>
 <input type="text" id="leitura" autofocus placeholder="Passe o código">
 
 <div id="resultado">
-  <h2 id="status"></h2>
-  <img id="foto"><br>
-  <h3 id="nome"></h3>
-  <p id="validade"></p>
+<h2 id="status"></h2>
+<h1 id="nome"></h1>
+<p id="validade"></p>
 </div>
 
 </div>
 
 <div id="admin" class="tela">
 
-<h2>Cadastro de Operador</h2>
+<h2>Cadastro</h2>
 
-<input type="text" id="nomeCadastro" placeholder="Nome"><br><br>
-<input type="date" id="validadeCadastro"><br><br>
-<input type="file" id="fotoCadastro"><br><br>
-
+<input type="text" id="nomeCadastro" placeholder="Nome">
+<input type="date" id="validadeCadastro">
 <button onclick="cadastrar()">Cadastrar</button>
 
-<h3>Código Gerado:</h3>
-<p id="codigoGerado"></p>
-<svg id="barcode"></svg>
-<br><br>
-<canvas id="qrcode"></canvas>
+<h2>Operadores Cadastrados</h2>
+
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Nome</th>
+<th>Validade</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody id="listaOperadores"></tbody>
+</table>
 
 </div>
 
@@ -101,133 +70,128 @@ img{
 
 let operadores = JSON.parse(localStorage.getItem("operadores")) || {};
 let contador = parseInt(localStorage.getItem("contador")) || 1;
-const senhaAdmin = "1234";
+const senhaAdmin="1234";
 
 function salvar(){
-  localStorage.setItem("operadores", JSON.stringify(operadores));
-  localStorage.setItem("contador", contador);
+localStorage.setItem("operadores",JSON.stringify(operadores));
+localStorage.setItem("contador",contador);
 }
 
 function gerarCodigo(){
-  let ano = new Date().getFullYear();
-  let numero = String(contador).padStart(3,"0");
-  contador++;
-  return "OP"+ano+numero;
+let ano=new Date().getFullYear();
+let numero=String(contador).padStart(3,"0");
+contador++;
+return "OP"+ano+numero;
 }
 
 function cadastrar(){
-
-  let nome = document.getElementById("nomeCadastro").value;
-  let validade = document.getElementById("validadeCadastro").value;
-  let fotoInput = document.getElementById("fotoCadastro");
-
-  if(!nome || !validade){
-    alert("Preencha todos os campos");
-    return;
-  }
-
-  let codigo = gerarCodigo();
-  let reader = new FileReader();
-
-  reader.onload = function(e){
-
-    operadores[codigo] = {
-      nome:nome,
-      validade:validade,
-      foto:e.target.result
-    };
-
-    salvar();
-    gerarCodigosVisuais(codigo);
-  };
-
-  if(fotoInput.files[0]){
-    reader.readAsDataURL(fotoInput.files[0]);
-  } else {
-    operadores[codigo] = {
-      nome:nome,
-      validade:validade,
-      foto:""
-    };
-    salvar();
-    gerarCodigosVisuais(codigo);
-  }
+let nome=document.getElementById("nomeCadastro").value;
+let validade=document.getElementById("validadeCadastro").value;
+if(!nome||!validade){alert("Preencha tudo");return;}
+let codigo=gerarCodigo();
+operadores[codigo]={nome,validade};
+salvar();
+atualizarLista();
 }
 
-function gerarCodigosVisuais(codigo){
+function atualizarLista(){
+let tbody=document.getElementById("listaOperadores");
+tbody.innerHTML="";
+for(let codigo in operadores){
+let op=operadores[codigo];
 
-  document.getElementById("codigoGerado").innerText=codigo;
-
-  JsBarcode("#barcode", codigo, {
-    format:"CODE128",
-    width:3,
-    height:100,
-    displayValue:true,
-    margin:0
-  });
-
-  let url = window.location.origin + window.location.pathname + "?codigo=" + codigo;
-
-  QRCode.toCanvas(document.getElementById("qrcode"), url);
+let linha=`
+<tr>
+<td>${codigo}</td>
+<td>${op.nome}</td>
+<td>${op.validade}</td>
+<td>
+<button onclick="editar('${codigo}')">Editar</button>
+<button onclick="excluirOperador('${codigo}')">Excluir</button>
+<br>
+<svg id="bar_${codigo}"></svg>
+<canvas id="qr_${codigo}"></canvas>
+</td>
+</tr>
+`;
+tbody.innerHTML+=linha;
 }
 
-document.getElementById("leitura").addEventListener("keydown", function(e){
-  if(e.key==="Enter"){
-    validarOperador(this.value.trim());
-    this.value="";
-  }
+for(let codigo in operadores){
+JsBarcode("#bar_"+codigo,codigo,{width:2,height:40});
+let url=window.location.origin+window.location.pathname+"?codigo="+codigo;
+QRCode.toCanvas(document.getElementById("qr_"+codigo),url,{width:80});
+}
+}
+
+function editar(codigo){
+let novoNome=prompt("Novo nome:",operadores[codigo].nome);
+if(novoNome!==null){
+let novaValidade=prompt("Nova validade (AAAA-MM-DD):",operadores[codigo].validade);
+if(novaValidade!==null){
+operadores[codigo].nome=novoNome;
+operadores[codigo].validade=novaValidade;
+salvar();
+atualizarLista();
+}
+}
+}
+
+function excluirOperador(codigo){
+if(confirm("Excluir operador?")){
+delete operadores[codigo];
+salvar();
+atualizarLista();
+}
+}
+
+document.getElementById("leitura").addEventListener("keydown",function(e){
+if(e.key==="Enter"){
+validar(this.value.trim());
+this.value="";
+}
 });
 
-function validarOperador(codigo){
+function validar(codigo){
+let op=operadores[codigo];
+if(!op){alert("Não encontrado");return;}
+let hoje=new Date();
+let validade=new Date(op.validade);
+let resultado=document.getElementById("resultado");
+resultado.style.display="block";
+document.getElementById("nome").innerText=op.nome;
+document.getElementById("validade").innerText="Validade: "+op.validade;
+document.getElementById("status").style.fontSize="80px";
+document.getElementById("nome").style.fontSize="50px";
 
-  let operador = operadores[codigo];
-  if(!operador){
-    alert("Operador não encontrado");
-    return;
-  }
-
-  let hoje = new Date();
-  let validade = new Date(operador.validade);
-
-  let resultado = document.getElementById("resultado");
-  resultado.style.display="block";
-
-  document.getElementById("nome").innerText=operador.nome;
-  document.getElementById("validade").innerText="Validade: "+operador.validade;
-  document.getElementById("foto").src=operador.foto;
-
-  if(validade >= hoje){
-    resultado.className="apto";
-    document.getElementById("status").innerText="APTO";
-  } else {
-    resultado.className="naoapto";
-    document.getElementById("status").innerText="NÃO APTO";
-  }
+if(validade>=hoje){
+resultado.className="apto";
+document.getElementById("status").innerText="APTO";
+}else{
+resultado.className="naoapto";
+document.getElementById("status").innerText="NÃO APTO";
+}
 }
 
 function irOperacao(){
-  document.getElementById("operacao").style.display="block";
-  document.getElementById("admin").style.display="none";
+document.getElementById("operacao").style.display="block";
+document.getElementById("admin").style.display="none";
 }
 
 function loginAdmin(){
-  let senha = prompt("Digite a senha de administrador:");
-  if(senha===senhaAdmin){
-    document.getElementById("admin").style.display="block";
-    document.getElementById("operacao").style.display="none";
-  } else {
-    alert("Senha incorreta!");
-  }
+let senha=prompt("Senha admin:");
+if(senha===senhaAdmin){
+document.getElementById("admin").style.display="block";
+document.getElementById("operacao").style.display="none";
+atualizarLista();
+}else{alert("Senha incorreta");}
 }
 
-window.onload = function(){
-  const params = new URLSearchParams(window.location.search);
-  const codigo = params.get("codigo");
-  if(codigo){
-    validarOperador(codigo);
-    document.getElementById("operacao").style.display="block";
-    document.getElementById("admin").style.display="none";
-  }
+window.onload=function(){
+atualizarLista();
+const params=new URLSearchParams(window.location.search);
+const codigo=params.get("codigo");
+if(codigo){validar(codigo);}
 };
 
 </script>
