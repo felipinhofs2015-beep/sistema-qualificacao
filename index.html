@@ -25,8 +25,8 @@ canvas{margin-top:5px}
 
 <header>
 <h1>Sistema de Qualificação</h1>
-<button onclick="irOperacao()">Modo Operação</button>
-<button onclick="loginAdmin()">Modo Administração</button>
+<button id="btnOperacao">Modo Operação</button>
+<button id="btnAdmin">Modo Administração</button>
 </header>
 
 <div id="operacao" class="tela">
@@ -196,15 +196,15 @@ function.validar = function (codigo) {
 };
 
 function.irOperacao = function () {
-    document.getElementById("operacao").style.display = "block";
-    document.getElementById("admin").style.display = "none";
+    document.getElementById("btnOperacao").addEventListener("click", irOperacao);
+    document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
 };
 
 function.loginAdmin = function () {
     let senha = prompt("Senha admin:");
     if (senha === senhaAdmin) {
-        document.getElementById("admin").style.display = "block";
-        document.getElementById("operacao").style.display = "none";
+        document.getElementById("btnOperacao").addEventListener("click", irOperacao);
+        document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
     } else {
         alert("Senha incorreta");
     }
@@ -243,6 +243,7 @@ window.validar = validar;
 
 </body>
 </html>
+
 
 
 
