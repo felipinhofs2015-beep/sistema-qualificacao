@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Qualificação</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  text-align:center;
+}
+
+header{
+  background:#2c3e50;
+  color:white;
+  padding:15px;
+}
+
+button{
+  padding:10px 20px;
+  margin:5px;
+  cursor:pointer;
+}
+
+.tela{
+  display:none;
+  padding:30px;
+}
+
+#operacao{
+  display:block;
+}
+
+#resultado{
+  margin-top:30px;
+  padding:40px;
+  border-radius:15px;
+  color:white;
+  display:none;
+}
+
+.apto{
+  background:#27ae60;
+}
+
+.naoapto{
+  background:#c0392b;
+}
+
+img{
+  width:150px;
+  border-radius:10px;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Sistema de Qualificação</h1>
+<button onclick="irOperacao()">Modo Operação</button>
+<button onclick="loginAdmin()">Modo Administração</button>
+</header>
+
+<div id="operacao" class="tela">
+
+<h2>Leitura do Operador</h2>
+<input type="text" id="leitura" autofocus placeholder="Passe o código">
+
+<div id="resultado">
+  <h2 id="status"></h2>
+  <img id="foto"><br>
+  <h3 id="nome"></h3>
+  <p id="validade"></p>
+</div>
+
+</div>
+
+<div id="admin" class="tela">
+
+<h2>Cadastro de Operador</h2>
+
+<input type="text" id="nomeCadastro" placeholder="Nome"><br><br>
+<input type="date" id="validadeCadastro"><br><br>
+<input type="file" id="fotoCadastro"><br><br>
+
+<button onclick="cadastrar()">Cadastrar</button>
+
+<h3>Código Gerado:</h3>
+<p id="codigoGerado"></p>
+<svg id="barcode"></svg>
+<br><br>
+<canvas id="qrcode"></canvas>
+
+</div>
+
+<script>
+
+let operadores = JSON.parse(localStorage.getItem("operadores")) || {};
+let contador = parseInt(localStorage.getItem("contador")) || 1;
+const senhaAdmin = "1234";
+
+function salvar(){
+  localStorage.setItem("operadores", JSON.stringify(operadores));
+  localStorage.setItem("contador", contador);
+}
+
+function gerarCodigo(){
+  let ano = new Date().getFullYear();
+  let numero = String(contador).padStart(3,"0");
+  contador++;
+  return "OP"+ano+numero;
+}
+
+function cadastrar(){
+
+  let nome = document.getElementById("nomeCadastro").value;
+  let validade = document.getElementById("validadeCadastro").value;
+  let fotoInput = document.getElementById("fotoCadastro");
+
+  if(!nome || !validade){
+    alert("Preencha todos os campos");
+    return;
+  }
+
+  let codigo = gerarCodigo();
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+
+    operadores[codigo] = {
+      nome:nome,
+      validade:validade,
+      foto:e.target.result
+    };
+
+    salvar();
+    gerarCodigosVisuais(codigo);
+  };
+
+  if(fotoInput.files[0]){
+    reader.readAsDataURL(fotoInput.files[0]);
+  } else {
+    operadores[codigo] = {
+      nome:nome,
+      validade:validade,
+      foto:""
+    };
+    salvar();
+    gerarCodigosVisuais(codigo);
+  }
+}
+
+function gerarCodigosVisuais(codigo){
+
+  document.getElementById("codigoGerado").innerText=codigo;
+
+  JsBarcode("#barcode", codigo, {
+    format:"CODE128",
+    width:3,
+    height:100,
+    displayValue:true,
+    margin:0
+  });
+
+  let url = window.location.origin + window.location.pathname + "?codigo=" + codigo;
+
+  QRCode.toCanvas(document.getElementById("qrcode"), url);
+}
+
+document.getElementById("leitura").addEventListener("keydown", function(e){
+  if(e.key==="Enter"){
+    validarOperador(this.value.trim());
+    this.value="";
+  }
+});
+
+function validarOperador(codigo){
+
+  let operador = operadores[codigo];
+  if(!operador){
+    alert("Operador não encontrado");
+    return;
+  }
+
+  let hoje = new Date();
+  let validade = new Date(operador.validade);
+
+  let resultado = document.getElementById("resultado");
+  resultado.style.display="block";
+
+  document.getElementById("nome").innerText=operador.nome;
+  document.getElementById("validade").innerText="Validade: "+operador.validade;
+  document.getElementById("foto").src=operador.foto;
+
+  if(validade >= hoje){
+    resultado.className="apto";
+    document.getElementById("status").innerText="APTO";
+  } else {
+    resultado.className="naoapto";
+    document.getElementById("status").innerText="NÃO APTO";
+  }
+}
+
+function irOperacao(){
+  document.getElementById("operacao").style.display="block";
+  document.getElementById("admin").style.display="none";
+}
+
+function loginAdmin(){
+  let senha = prompt("Digite a senha de administrador:");
+  if(senha===senhaAdmin){
+    document.getElementById("admin").style.display="block";
+    document.getElementById("operacao").style.display="none";
+  } else {
+    alert("Senha incorreta!");
+  }
+}
+
+window.onload = function(){
+  const params = new URLSearchParams(window.location.search);
+  const codigo = params.get("codigo");
+  if(codigo){
+    validarOperador(codigo);
+    document.getElementById("operacao").style.display="block";
+    document.getElementById("admin").style.display="none";
+  }
+};
+
+</script>
+
+</body>
+</html>
