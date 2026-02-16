@@ -69,7 +69,7 @@ canvas{margin-top:5px}
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
@@ -85,14 +85,13 @@ const db = getFirestore(app);
 const funcionariosRef = collection(db, "funcionarios");
 
 const senhaAdmin = "1234";
-
 let operadores = {};
 
 function gerarCodigo() {
     return "OP" + Date.now();
 }
 
-function.cadastrar = async function () {
+async function cadastrar() {
     let nome = document.getElementById("nomeCadastro").value;
     let validade = document.getElementById("validadeCadastro").value;
 
@@ -112,7 +111,7 @@ function.cadastrar = async function () {
 
     document.getElementById("nomeCadastro").value = "";
     document.getElementById("validadeCadastro").value = "";
-};
+}
 
 function atualizarLista() {
     let tbody = document.getElementById("listaOperadores");
@@ -146,7 +145,7 @@ function atualizarLista() {
     }
 }
 
-function.editar = async function (id) {
+async function editar(id) {
     let op = operadores[id];
 
     let novoNome = prompt("Novo nome:", op.nome);
@@ -159,17 +158,16 @@ function.editar = async function (id) {
         nome: novoNome,
         validade: novaValidade
     });
-};
+}
 
-function.excluirOperador = async function (id) {
+async function excluirOperador(id) {
     if (confirm("Excluir operador?")) {
         await deleteDoc(doc(db, "funcionarios", id));
     }
-};
+}
 
-function.validar = function (codigo) {
+function validar(codigo) {
     let op = Object.values(operadores).find(o => o.codigo === codigo);
-
     if (!op) {
         alert("Não encontrado");
         return;
@@ -177,14 +175,11 @@ function.validar = function (codigo) {
 
     let hoje = new Date();
     let validade = new Date(op.validade);
-
     let resultado = document.getElementById("resultado");
     resultado.style.display = "block";
 
     document.getElementById("nome").innerText = op.nome;
     document.getElementById("validade").innerText = "Validade: " + op.validade;
-    document.getElementById("status").style.fontSize = "80px";
-    document.getElementById("nome").style.fontSize = "50px";
 
     if (validade >= hoje) {
         resultado.className = "apto";
@@ -193,22 +188,25 @@ function.validar = function (codigo) {
         resultado.className = "naoapto";
         document.getElementById("status").innerText = "NÃO APTO";
     }
-};
+}
 
-function.irOperacao = function () {
-    document.getElementById("btnOperacao").addEventListener("click", irOperacao);
-    document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
-};
+function irOperacao() {
+    document.getElementById("operacao").style.display = "block";
+    document.getElementById("admin").style.display = "none";
+}
 
-function.loginAdmin = function () {
+function loginAdmin() {
     let senha = prompt("Senha admin:");
     if (senha === senhaAdmin) {
-        document.getElementById("btnOperacao").addEventListener("click", irOperacao);
-        document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
+        document.getElementById("admin").style.display = "block";
+        document.getElementById("operacao").style.display = "none";
     } else {
         alert("Senha incorreta");
     }
-};
+}
+
+document.getElementById("btnOperacao").addEventListener("click", irOperacao);
+document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
 
 document.getElementById("leitura").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
@@ -225,24 +223,13 @@ onSnapshot(funcionariosRef, (snapshot) => {
     atualizarLista();
 });
 
-function.onload = function () {
+window.onload = function () {
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
     if (codigo) validar(codigo);
 };
-window.loginAdmin = loginAdmin;
-window.irOperacao = irOperacao;
-window.cadastrar = cadastrar;
-window.editar = editar;
-window.excluirOperador = excluirOperador;
-window.validar = validar;
-
 
 </script>
-
-
-</body>
-</html>
 
 
 
