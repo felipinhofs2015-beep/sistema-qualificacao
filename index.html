@@ -858,7 +858,6 @@
               <div class="cracha-detalhe">ID: <strong id="crachaId">—</strong></div>
               <div class="cracha-detalhe">Emitido: <strong id="crachaEmitido">—</strong></div>
               <div class="cracha-detalhe">Validade: <strong id="crachaValidade">—</strong></div>
-              <span class="cracha-status" id="crachaStatus">—</span>
             </div>
           </div>
           <div class="cracha-barcode">
@@ -867,7 +866,6 @@
           </div>
         </div>
       </div>
-      <div id="printArea" style="display:none"></div>
       <div class="modal-btns">
         <button class="btn btn-secondary" onclick="fecharModalCracha()">Fechar</button>
         <button class="btn btn-primary" onclick="imprimirCracha()">🖨️ Imprimir</button>
@@ -1245,9 +1243,6 @@
       const op = operadores[id];
       if (!op) return;
 
-      const dias = diasAte(op.validade);
-      const apto = dias >= 0;
-
       // Preencher dados no crachá
       document.getElementById("crachaNome").innerText = op.nome;
       document.getElementById("crachaId").innerText = op.codigo;
@@ -1255,11 +1250,6 @@
       document.getElementById("crachaEmitido").innerText = op.criadoEm
         ? formatarData(op.criadoEm.split("T")[0])
         : formatarData(new Date().toISOString().split("T")[0]);
-
-      // Status
-      const statusEl = document.getElementById("crachaStatus");
-      statusEl.innerText = apto ? "APTO" : "NÃO APTO";
-      statusEl.className = "cracha-status " + (apto ? "apto" : "naoapto");
 
       // Foto
       const fotoBox = document.getElementById("crachaFotoBox");
@@ -1286,15 +1276,69 @@
     }
 
     function imprimirCracha() {
-      // Clonar o crachá para a área de impressão e acionar print
-      const clone = document.getElementById("crachaPreview").cloneNode(true);
-      const printArea = document.getElementById("printArea");
-      printArea.innerHTML = "";
-      printArea.style.display = "block";
-      printArea.appendChild(clone);
-      // Re-renderizar barcode dentro do clone (o SVG já está copiado)
-      window.print();
-      setTimeout(() => { printArea.style.display = "none"; }, 1000);
+      const op_nome = document.getElementById("crachaNome").innerText;
+      const op_id = document.getElementById("crachaId").innerText;
+      const op_validade = document.getElementById("crachaValidade").innerText;
+      const op_emitido = document.getElementById("crachaEmitido").innerText;
+      const op_foto = document.getElementById("crachaFotoBox").querySelector("img")?.src || "";
+      const barcodeEl = document.getElementById("crachaBarcode");
+      const barcodeSVG = barcodeEl ? barcodeEl.outerHTML : "";
+      const op_codigo = document.getElementById("crachaCodigoTexto").innerText;
+
+      const fotoHtml = op_foto
+        ? `<img src="${op_foto}" style="width:100%;height:100%;object-fit:cover">`
+        : `<span style="font-size:2.5rem">👤</span>`;
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Crachá - ${op_nome}</title>
+  <style>
+    body { margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; font-family: Arial, sans-serif; }
+    .cracha { width: 300px; background: #f0f0f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.2); color: #111; }
+    .cracha-topo { background: #111; color: white; text-align: center; padding: 14px 10px 10px; }
+    .cracha-topo .titulo { font-size: 1rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+    .cracha-topo .empresa { font-size: 0.65rem; letter-spacing: 1px; margin-top: 4px; opacity: 0.8; text-transform: uppercase; }
+    .cracha-corpo { display: flex; gap: 12px; padding: 16px; align-items: flex-start; }
+    .cracha-foto { width: 90px; height: 110px; border: 2px solid #999; border-radius: 2px; flex-shrink: 0; background: #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cracha-info { flex: 1; }
+    .cracha-nome { font-size: 0.95rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; line-height: 1.2; }
+    .cracha-detalhe { font-size: 0.68rem; color: #333; margin-bottom: 3px; }
+    .cracha-detalhe strong { color: #111; }
+    .cracha-barcode { background: white; padding: 8px 16px 6px; text-align: center; border-top: 1px solid #ccc; }
+    .cracha-barcode svg { max-width: 100%; }
+    .cracha-codigo-texto { font-size: 0.65rem; color: #555; margin-top: 2px; letter-spacing: 1px; }
+    @media print { body { margin: 0; } .cracha { box-shadow: none; } }
+  </style>
+</head>
+<body>
+  <div class="cracha">
+    <div class="cracha-topo">
+      <div class="titulo">Operador Qualificado</div>
+      <div class="empresa">Sistema de Qualificação</div>
+    </div>
+    <div class="cracha-corpo">
+      <div class="cracha-foto">${fotoHtml}</div>
+      <div class="cracha-info">
+        <div class="cracha-nome">${op_nome}</div>
+        <div class="cracha-detalhe">ID: <strong>${op_id}</strong></div>
+        <div class="cracha-detalhe">Emitido: <strong>${op_emitido}</strong></div>
+        <div class="cracha-detalhe">Validade: <strong>${op_validade}</strong></div>
+      </div>
+    </div>
+    <div class="cracha-barcode">
+      ${barcodeSVG}
+      <div class="cracha-codigo-texto">${op_codigo}</div>
+    </div>
+  </div>
+  <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>
+</body></html>`;
+
+      const win = window.open("", "_blank", "width=420,height=580");
+      if (!win) { toast("Permita pop-ups para imprimir o crachá", "aviso"); return; }
+      win.document.write(html);
+      win.document.close();
     }
 
     // ── Expo global ───────────────────────────────────────────────
