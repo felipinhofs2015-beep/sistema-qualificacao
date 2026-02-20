@@ -50,6 +50,7 @@ canvas{margin-top:5px}
 <input type="file" id="fotoCadastro" accept="image/*">
 
 <h2>Operadores Cadastrados</h2>
+<input type="text" id="pesquisaOperador" placeholder="Pesquisar por nome ou código">
 <table>
 <thead>
 <tr>
@@ -174,10 +175,20 @@ function validar(codigo) {
 
 function atualizarLista() {
   const tbody = document.getElementById("listaOperadores");
+  const termoPesquisa = (document.getElementById("pesquisaOperador")?.value || "").trim().toLowerCase();
   tbody.innerHTML = "";
 
-  for (const id in operadores) {
-    const op = operadores[id];
+  const operadoresFiltrados = Object.entries(operadores).filter(([, op]) => {
+    if (!termoPesquisa) return true;
+    return op.nome.toLowerCase().includes(termoPesquisa) || op.codigo.toLowerCase().includes(termoPesquisa);
+  });
+
+  if (!operadoresFiltrados.length) {
+    tbody.innerHTML = '<tr><td colspan="4">Nenhum operador encontrado.</td></tr>';
+    return;
+  }
+
+  for (const [id, op] of operadoresFiltrados) {
     const linha = `
       <tr>
         <td>${op.codigo}</td>
@@ -194,8 +205,7 @@ function atualizarLista() {
     tbody.innerHTML += linha;
   }
 
-  for (const id in operadores) {
-    const op = operadores[id];
+  for (const [, op] of operadoresFiltrados) {
     JsBarcode("#bar_" + op.codigo, op.codigo, { width: 2, height: 40 });
     const url = window.location.origin + window.location.pathname + "?codigo=" + op.codigo;
     QRCode.toCanvas(document.getElementById("qr_" + op.codigo), url, { width: 80 });
@@ -316,6 +326,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btnOperacao").addEventListener("click", irOperacao);
   document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
+  document.getElementById("pesquisaOperador").addEventListener("input", atualizarLista);
   document.getElementById("leitura").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
       validar(this.value.trim());
