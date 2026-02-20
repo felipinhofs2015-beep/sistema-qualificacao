@@ -153,7 +153,11 @@ function validar(codigo) {
 
   const hoje = new Date();
   const validade = new Date(op.validade);
-  const diasRestantes = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+
+  const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const validadeSemHora = new Date(validade.getFullYear(), validade.getMonth(), validade.getDate());
+  const diasDiff = Math.round((validadeSemHora - hojeSemHora) / (1000 * 60 * 60 * 24));
+  const apto = diasDiff >= 0;
 
   document.getElementById("nome").innerText = op.nome;
 
@@ -166,14 +170,14 @@ function validar(codigo) {
     fotoOperador.style.display = "none";
   }
 
-  const textoDias = diasRestantes >= 0
-    ? "Restam " + diasRestantes + " dias"
-    : "Venceu há " + Math.abs(diasRestantes) + " dias";
+  const textoDias = apto
+    ? "Restam " + diasDiff + " dias"
+    : "Venceu há " + Math.abs(diasDiff) + " dias";
 
   document.getElementById("validade").innerHTML =
     "Termina em: " + validade.toLocaleDateString("pt-BR") + "<br>" + textoDias;
 
-  if (validade >= hoje) {
+  if (apto) {
     resultado.className = "apto";
     document.getElementById("status").innerText = "APTO";
   } else {
@@ -384,3 +388,4 @@ try {
 
 </body>
 </html>
+
