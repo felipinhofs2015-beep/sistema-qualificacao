@@ -14,6 +14,7 @@ button{padding:6px 12px;margin:3px;cursor:pointer}
 .tela{display:none;padding:20px}
 #operacao{display:block}
 #resultado{margin-top:30px;padding:40px;border-radius:15px;color:white;display:none}
+#fotoOperador{width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,.7);margin:10px auto;display:none}
 .apto{background:#27ae60}
 .naoapto{background:#c0392b}
 table{width:100%;margin-top:20px;border-collapse:collapse}
@@ -36,6 +37,7 @@ canvas{margin-top:5px}
 <div id="resultado">
 <h2 id="status"></h2>
 <h1 id="nome"></h1>
+<img id="fotoOperador" alt="Foto do operador">
 <p id="validade"></p>
 </div>
 </div>
@@ -148,6 +150,16 @@ function validar(codigo) {
   const diasRestantes = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
 
   document.getElementById("nome").innerText = op.nome;
+
+  const fotoOperador = document.getElementById("fotoOperador");
+  if (op.foto) {
+    fotoOperador.src = op.foto;
+    fotoOperador.style.display = "block";
+  } else {
+    fotoOperador.removeAttribute("src");
+    fotoOperador.style.display = "none";
+  }
+
   document.getElementById("validade").innerHTML =
     "Termina em: " + validade.toLocaleDateString("pt-BR") + "<br>Restam " + diasRestantes + " dias";
 
