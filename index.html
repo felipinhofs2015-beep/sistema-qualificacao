@@ -49,6 +49,7 @@ canvas{margin-top:5px}
 <input type="text" id="nomeCadastro" placeholder="Nome">
 <input type="date" id="validadeCadastro">
 <button onclick="cadastrar()">Cadastrar</button>
+<input type="file" id="fotoCadastro" accept="image/*">
 
 <h2>Operadores Cadastrados</h2>
 
@@ -70,6 +71,7 @@ canvas{margin-top:5px}
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
@@ -83,6 +85,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const funcionariosRef = collection(db, "funcionarios");
+const storage = getStorage(app);
 
 const senhaAdmin = "1234";
 let operadores = {};
@@ -92,14 +95,34 @@ function gerarCodigo() {
 }
 
 async function cadastrar() {
+
     let nome = document.getElementById("nomeCadastro").value;
     let validade = document.getElementById("validadeCadastro").value;
+    let fotoArquivo = document.getElementById("fotoCadastro").files[0];
 
-    if (!nome || !validade) {
+    if (!nome || !validade || !fotoArquivo) {
         alert("Preencha tudo");
         return;
     }
 
+    let codigo = gerarCodigo();
+
+    const storageRef = ref(storage, "fotos/" + codigo);
+    await uploadBytes(storageRef, fotoArquivo);
+    const fotoURL = await getDownloadURL(storageRef);
+
+    await addDoc(funcionariosRef, {
+        codigo,
+        nome,
+        validade,
+        foto: fotoURL,
+        criadoEm: new Date()
+    });
+
+    document.getElementById("nomeCadastro").value = "";
+    document.getElementById("validadeCadastro").value = "";
+    document.getElementById("fotoCadastro").value = "";
+}
     let codigo = gerarCodigo();
 
     await addDoc(funcionariosRef, {
@@ -123,7 +146,9 @@ function atualizarLista() {
         let linha = `
         <tr>
         <td>${op.codigo}</td>
-        <td>${op.nome}</td>
+        <td><img src="${op.foto}" width="50"><br>
+        ${op.nome}
+        </td>
         <td>${op.validade}</td>
         <td>
         <button onclick="editar('${id}')">Editar</button>
@@ -173,10 +198,16 @@ function validar(codigo) {
         return;
     }
 
-    let hoje = new Date();
-    let validade = new Date(op.validade);
-    let resultado = document.getElementById("resultado");
-    resultado.style.display = "block";
+   let hoje = new Date();
+let validade = new Date(op.validade);
+
+let diff = validade - hoje;
+let diasRestantes = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+let dataFormatada = validade.toLocaleDateString("pt-BR");
+
+document.getElementById("validade").innerHTML =
+"Termina em: " + dataFormatada + "<br>Restam " + diasRestantes + " dias";
 
     document.getElementById("nome").innerText = op.nome;
     document.getElementById("validade").innerText = "Validade: " + op.validade;
@@ -230,6 +261,7 @@ window.onload = function () {
 };
 
 </script>
+
 
 
 
