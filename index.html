@@ -63,6 +63,7 @@ canvas{margin-top:5px}
 
 <script>
 const senhaAdmin = "1234";
+const STORAGE_KEY = "sq_operadores_local";
 let operadores = {};
 let firebaseDisponivel = false;
 let firebaseApi = null;
@@ -78,6 +79,41 @@ window.firebaseConfig = {
 
 function gerarCodigo() {
   return "OP" + Date.now();
+}
+
+function configFirebaseValida() {
+  const cfg = window.firebaseConfig || {};
+  const valores = [cfg.apiKey, cfg.authDomain, cfg.projectId, cfg.storageBucket, cfg.messagingSenderId, cfg.appId];
+  if (valores.some((v) => !v || typeof v !== "string")) return false;
+  return !valores.some((v) => v.startsWith("SUA_") || v.startsWith("SEU_"));
+}
+
+function gerarIdLocal() {
+  return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+}
+
+function salvarOperadoresLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(operadores));
+}
+
+function carregarOperadoresLocal() {
+  const bruto = localStorage.getItem(STORAGE_KEY);
+  if (!bruto) return;
+
+  try {
+    operadores = JSON.parse(bruto) || {};
+  } catch (_erro) {
+    operadores = {};
+  }
+}
+
+function lerArquivoComoDataURL(arquivo) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Falha ao ler imagem."));
+    reader.readAsDataURL(arquivo);
+  });
 }
 
 function irOperacao() {
@@ -155,11 +191,6 @@ function atualizarLista() {
 }
 
 async function cadastrar() {
-  if (!firebaseDisponivel || !firebaseApi) {
-    alert("Firebase não configurado. Preencha as credenciais no firebaseConfig.");
-    return;
-  }
-
   const nome = document.getElementById("nomeCadastro").value;
   const validade = document.getElementById("validadeCadastro").value;
   const fotoArquivo = document.getElementById("fotoCadastro").files[0];
@@ -169,18 +200,46 @@ async function cadastrar() {
     return;
   }
 
-  const codigo = gerarCodigo();
-  const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
-  await firebaseApi.uploadBytes(storageRef, fotoArquivo);
-  const fotoURL = await firebaseApi.getDownloadURL(storageRef);
+  const cadastrarLocal = async () => {
+    const id = gerarIdLocal();
+    const codigo = gerarCodigo();
+    const foto = await lerArquivoComoDataURL(fotoArquivo);
 
-  await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-    codigo,
-    nome,
-    validade,
-    foto: fotoURL,
-    criadoEm: new Date()
-  });
+    operadores[id] = {
+      codigo,
+      nome,
+      validade,
+      foto,
+      criadoEm: new Date().toISOString()
+    };
+
+    salvarOperadoresLocal();
+    atualizarLista();
+  };
+
+  if (firebaseDisponivel && firebaseApi) {
+    try {
+      const codigo = gerarCodigo();
+      const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
+      await firebaseApi.uploadBytes(storageRef, fotoArquivo);
+      const fotoURL = await firebaseApi.getDownloadURL(storageRef);
+
+      await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
+        codigo,
+        nome,
+        validade,
+        foto: fotoURL,
+        criadoEm: new Date()
+      });
+    } catch (erro) {
+      console.error("Falha no cadastro via Firebase, salvando localmente:", erro);
+      await cadastrarLocal();
+      alert("Firebase indisponível no momento. Cadastro salvo localmente.");
+    }
+  } else {
+    await cadastrarLocal();
+    alert("Cadastro salvo localmente (Firebase indisponível).\nConfigure firebaseConfig para sincronizar na nuvem.");
+  }
 
   document.getElementById("nomeCadastro").value = "";
   document.getElementById("validadeCadastro").value = "";
@@ -188,11 +247,6 @@ async function cadastrar() {
 }
 
 async function editar(id) {
-  if (!firebaseDisponivel || !firebaseApi) {
-    alert("Firebase não configurado.");
-    return;
-  }
-
   const op = operadores[id];
   const novoNome = prompt("Novo nome:", op.nome);
   if (novoNome === null) return;
@@ -200,29 +254,40 @@ async function editar(id) {
   const novaValidade = prompt("Nova validade (AAAA-MM-DD):", op.validade);
   if (novaValidade === null) return;
 
-  await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), {
-    nome: novoNome,
-    validade: novaValidade
-  });
+  if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
+    await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), {
+      nome: novoNome,
+      validade: novaValidade
+    });
+  } else {
+    operadores[id].nome = novoNome;
+    operadores[id].validade = novaValidade;
+    salvarOperadoresLocal();
+    atualizarLista();
+  }
 }
 
 async function excluirOperador(id) {
-  if (!firebaseDisponivel || !firebaseApi) {
-    alert("Firebase não configurado.");
-    return;
-  }
+  if (!confirm("Excluir operador?")) return;
 
-  if (confirm("Excluir operador?")) {
+  if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
     await firebaseApi.deleteDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id));
+  } else {
+    delete operadores[id];
+    salvarOperadoresLocal();
+    atualizarLista();
   }
 }
 
 window.cadastrar = cadastrar;
 window.editar = editar;
 window.excluirOperador = excluirOperador;
+window.configFirebaseValida = configFirebaseValida;
 window.setFirebaseApi = function setFirebaseApi(api) {
   firebaseApi = api;
-  firebaseDisponivel = true;
+  firebaseDisponivel = configFirebaseValida();
+
+  if (!firebaseDisponivel) return;
 
   firebaseApi.onSnapshot(firebaseApi.funcionariosRef, (snapshot) => {
     operadores = {};
@@ -234,6 +299,9 @@ window.setFirebaseApi = function setFirebaseApi(api) {
 };
 
 window.addEventListener("DOMContentLoaded", () => {
+  carregarOperadoresLocal();
+  atualizarLista();
+
   document.getElementById("btnOperacao").addEventListener("click", irOperacao);
   document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
   document.getElementById("leitura").addEventListener("keydown", function (e) {
@@ -255,24 +323,28 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 try {
-  const app = initializeApp(window.firebaseConfig);
+  if (!window.configFirebaseValida || !window.configFirebaseValida()) {
+    console.warn("Firebase não configurado: usando modo local.");
+  } else {
+    const app = initializeApp(window.firebaseConfig);
   const db = getFirestore(app);
   const funcionariosRef = collection(db, "funcionarios");
   const storage = getStorage(app);
 
-  window.setFirebaseApi({
-    db,
-    funcionariosRef,
-    storage,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    onSnapshot,
-    ref,
-    uploadBytes,
-    getDownloadURL
-  });
+    window.setFirebaseApi({
+      db,
+      funcionariosRef,
+      storage,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    });
+  }
 } catch (erro) {
   console.error("Falha ao inicializar Firebase:", erro);
 }
