@@ -82,19 +82,80 @@ const firebaseConfig = {
   appId: "SEU_APP_ID"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const funcionariosRef = collection(db, "funcionarios");
-const storage = getStorage(app);
-
 const senhaAdmin = "1234";
 let operadores = {};
+let db = null;
+let funcionariosRef = null;
+let storage = null;
+let firebaseDisponivel = false;
 
 function gerarCodigo() {
     return "OP" + Date.now();
 }
 
-async function cadastrar() {␊
+function irOperacao() {
+    document.getElementById("operacao").style.display = "block";
+    document.getElementById("admin").style.display = "none";
+}
+
+function loginAdmin() {
+    let senha = prompt("Senha admin:");
+    if (senha === null) return;
+
+    if (senha === senhaAdmin) {
+        document.getElementById("admin").style.display = "block";
+        document.getElementById("operacao").style.display = "none";
+    } else {
+        alert("Senha incorreta");
+    }
+}
+
+document.getElementById("btnOperacao").addEventListener("click", irOperacao);
+document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
+
+document.getElementById("leitura").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        validar(this.value.trim());
+        this.value = "";
+    }
+});
+
+function validar(codigo) {
+    let op = Object.values(operadores).find(o => o.codigo === codigo);
+    if (!op) {
+        alert("Não encontrado");
+        return;
+    }
+
+    const resultado = document.getElementById("resultado");
+    resultado.style.display = "block";
+
+    let hoje = new Date();
+    let validade = new Date(op.validade);
+
+    let diff = validade - hoje;
+    let diasRestantes = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    let dataFormatada = validade.toLocaleDateString("pt-BR");
+
+    document.getElementById("nome").innerText = op.nome;
+    document.getElementById("validade").innerHTML =
+        "Termina em: " + dataFormatada + "<br>Restam " + diasRestantes + " dias";
+
+    if (validade >= hoje) {
+        resultado.className = "apto";
+        document.getElementById("status").innerText = "APTO";
+    } else {
+        resultado.className = "naoapto";
+        document.getElementById("status").innerText = "NÃO APTO";
+    }
+}
+
+async function cadastrar() {
+    if (!firebaseDisponivel) {
+        alert("Firebase não configurado. Preencha as credenciais no firebaseConfig.");
+        return;
+    }
 
     let nome = document.getElementById("nomeCadastro").value;
     let validade = document.getElementById("validadeCadastro").value;
@@ -123,18 +184,6 @@ async function cadastrar() {␊
     document.getElementById("validadeCadastro").value = "";
     document.getElementById("fotoCadastro").value = "";
 }
-    let codigo = gerarCodigo();
-
-    await addDoc(funcionariosRef, {
-        codigo,
-        nome,
-        validade,
-        criadoEm: new Date()
-    });
-
-    document.getElementById("nomeCadastro").value = "";
-    document.getElementById("validadeCadastro").value = "";
-}
 
 function atualizarLista() {
     let tbody = document.getElementById("listaOperadores");
@@ -146,7 +195,7 @@ function atualizarLista() {
         let linha = `
         <tr>
         <td>${op.codigo}</td>
-        <td><img src="${op.foto}" width="50"><br>
+        <td>${op.foto ? `<img src="${op.foto}" width="50"><br>` : ""}
         ${op.nome}
         </td>
         <td>${op.validade}</td>
@@ -171,6 +220,11 @@ function atualizarLista() {
 }
 
 async function editar(id) {
+    if (!firebaseDisponivel) {
+        alert("Firebase não configurado.");
+        return;
+    }
+
     let op = operadores[id];
 
     let novoNome = prompt("Novo nome:", op.nome);
@@ -186,75 +240,44 @@ async function editar(id) {
 }
 
 async function excluirOperador(id) {
+    if (!firebaseDisponivel) {
+        alert("Firebase não configurado.");
+        return;
+    }
+
     if (confirm("Excluir operador?")) {
         await deleteDoc(doc(db, "funcionarios", id));
     }
 }
 
-function validar(codigo) {
-    let op = Object.values(operadores).find(o => o.codigo === codigo);
-    if (!op) {
-        alert("Não encontrado");
-        return;
-    }
+function iniciarFirebase() {
+    try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        funcionariosRef = collection(db, "funcionarios");
+        storage = getStorage(app);
+        firebaseDisponivel = true;
 
-   let hoje = new Date();
-let validade = new Date(op.validade);
-
-let diff = validade - hoje;
-let diasRestantes = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-let dataFormatada = validade.toLocaleDateString("pt-BR");
-
-document.getElementById("validade").innerHTML =
-"Termina em: " + dataFormatada + "<br>Restam " + diasRestantes + " dias";
-
-    document.getElementById("nome").innerText = op.nome;
-    document.getElementById("validade").innerText = "Validade: " + op.validade;
-
-    if (validade >= hoje) {
-        resultado.className = "apto";
-        document.getElementById("status").innerText = "APTO";
-    } else {
-        resultado.className = "naoapto";
-        document.getElementById("status").innerText = "NÃO APTO";
+        onSnapshot(funcionariosRef, (snapshot) => {
+            operadores = {};
+            snapshot.forEach((docSnap) => {
+                operadores[docSnap.id] = docSnap.data();
+            });
+            atualizarLista();
+        });
+    } catch (erro) {
+        console.error("Falha ao inicializar Firebase:", erro);
+        firebaseDisponivel = false;
     }
 }
 
-function irOperacao() {
-    document.getElementById("operacao").style.display = "block";
-    document.getElementById("admin").style.display = "none";
-}
-
-function loginAdmin() {
-    let senha = prompt("Senha admin:");
-    if (senha === senhaAdmin) {
-        document.getElementById("admin").style.display = "block";
-        document.getElementById("operacao").style.display = "none";
-    } else {
-        alert("Senha incorreta");
-    }
-}
-
-document.getElementById("btnOperacao").addEventListener("click", irOperacao);
-document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
-
-document.getElementById("leitura").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-        validar(this.value.trim());
-        this.value = "";
-    }
-});
-
-onSnapshot(funcionariosRef, (snapshot) => {
-    operadores = {};
-    snapshot.forEach((docSnap) => {
-        operadores[docSnap.id] = docSnap.data();
-    });
-    atualizarLista();
-});
+window.cadastrar = cadastrar;
+window.editar = editar;
+window.excluirOperador = excluirOperador;
 
 window.onload = function () {
+    iniciarFirebase();
+
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
     if (codigo) validar(codigo);
@@ -262,8 +285,5 @@ window.onload = function () {
 
 </script>
 
-
-
-
-
-
+</body>
+</html>
