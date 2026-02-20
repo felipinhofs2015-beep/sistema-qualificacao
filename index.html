@@ -20,6 +20,8 @@ button{padding:6px 12px;margin:3px;cursor:pointer}
 table{width:100%;margin-top:20px;border-collapse:collapse}
 td,th{border:1px solid #ccc;padding:8px}
 canvas{margin-top:5px}
+#pesquisaContainer{margin:10px auto 18px;display:flex;gap:8px;justify-content:center;align-items:center}
+#pesquisaOperador{width:340px;max-width:90%;padding:8px 10px;border:1px solid #999;border-radius:6px;font-size:15px}
 </style>
 </head>
 <body>
@@ -50,7 +52,10 @@ canvas{margin-top:5px}
 <input type="file" id="fotoCadastro" accept="image/*">
 
 <h2>Operadores Cadastrados</h2>
-<input type="text" id="pesquisaOperador" placeholder="Pesquisar por nome ou código">
+<div id="pesquisaContainer">
+<label for="pesquisaOperador"><strong>Pesquisar:</strong></label>
+<input type="text" id="pesquisaOperador" placeholder="Digite nome ou código do operador">
+</div>
 <table>
 <thead>
 <tr>
