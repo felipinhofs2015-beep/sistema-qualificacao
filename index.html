@@ -1,76 +1,614 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="pt-BR"><head>
 <meta charset="UTF-8">
-<title>Sistema de Qualificação</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Qualificacão</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-body{font-family:Arial;margin:0;text-align:center}
-header{background:#2c3e50;color:white;padding:15px}
-button{padding:6px 12px;margin:3px;cursor:pointer}
-.tela{display:none;padding:20px}
-#operacao{display:block}
-#resultado{margin-top:30px;padding:40px;border-radius:15px;color:white;display:none}
-#fotoOperador{width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,.7);margin:10px auto;display:none}
-.apto{background:#27ae60}
-.naoapto{background:#c0392b}
-table{width:100%;margin-top:20px;border-collapse:collapse}
-td,th{border:1px solid #ccc;padding:8px}
-canvas{margin-top:5px}
-#pesquisaContainer{margin:10px auto 18px;display:flex;gap:8px;justify-content:center;align-items:center}
-#pesquisaOperador{width:340px;max-width:90%;padding:8px 10px;border:1px solid #999;border-radius:6px;font-size:15px}
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #263348;
+    --border: #334155;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --green: #22c55e;
+    --green-bg: #052e16;
+    --red: #ef4444;
+    --red-bg: #2d0a0a;
+    --yellow: #f59e0b;
+    --yellow-bg: #2d1b00;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--border);
+    transform: translateY(-1px);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 5px 12px;
+    font-size: 0.8rem;
+  }
+
+  .btn-danger:hover {
+    background: var(--red);
+    color: white;
+  }
+
+  .btn-edit {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 12px;
+    font-size: 0.8rem;
+  }
+
+  .btn-edit:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-export {
+    background: var(--surface2);
+    color: var(--green);
+    border: 1px solid var(--green);
+    font-size: 0.8rem;
+    padding: 7px 14px;
+  }
+
+  .btn-export:hover {
+    background: var(--green);
+    color: white;
+  }
+
+  .tela {
+    display: none;
+    padding: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #operacao { display: block; }
+
+  /* ── Tela de Leitura ── */
+  .leitura-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .leitura-card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .leitura-card p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+  }
+
+  #leitura {
+    width: 100%;
+    max-width: 420px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 2px;
+    transition: border-color 0.2s;
+  }
+
+  #leitura:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+  }
+
+  /* ── Resultado ── */
+  #resultado {
+    margin-top: 28px;
+    padding: 36px;
+    border-radius: var(--radius);
+    display: none;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+    border: 1px solid transparent;
+  }
+
+  #resultado.apto {
+    background: var(--green-bg);
+    border-color: var(--green);
+  }
+
+  #resultado.naoapto {
+    background: var(--red-bg);
+    border-color: var(--red);
+  }
+
+  #resultado.naoEncontrado {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  #status {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .apto #status { color: var(--green); }
+  .naoapto #status { color: var(--red); }
+  .naoEncontrado #status { color: var(--text-muted); }
+
+  #nome {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  #fotoOperador {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.3);
+    margin: 10px auto 16px;
+    display: none;
+  }
+
+  #validade {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* ── Admin ── */
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  .card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="date"],
+  .form-group input[type="file"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  .form-group input[type="file"] {
+    padding: 7px 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+  }
+
+  .foto-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Tabela ── */
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .table-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+
+  #pesquisaContainer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  #pesquisaOperador {
+    flex: 1;
+    padding: 9px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+  }
+
+  #pesquisaOperador:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .operador-foto {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-ok { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-aviso { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .badge-vencido { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  .acoes { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+  canvas, svg { display: block; margin-top: 6px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    max-width: 320px;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    header { padding: 14px 16px; }
+    header h1 { font-size: 1.1rem; }
+    .tela { padding: 16px; }
+    .admin-grid { grid-template-columns: 1fr; }
+    .header-btns .btn span { display: none; }
+  }
 </style>
-</head>
-<body>
+<style id="antigravity-scroll-lock-style">
+  html:root body.antigravity-scroll-lock {
+    overflow: hidden !important;
+  }
+</style><style>
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+</style></head>
+<body class="">
 
 <header>
-<h1>Sistema de Qualificação</h1>
-<button id="btnOperacao">Modo Operação</button>
-<button id="btnAdmin">Modo Administração</button>
+  <h1>⚙️ Sistema de Qualificacão</h1>
+  <div class="header-btns">
+    <button class="btn btn-secondary" id="btnOperacao">🔍 <span>Modo Operacão</span></button>
+    <button class="btn btn-primary" id="btnAdmin">🔐 <span>Administracão</span></button>
+  </div>
 </header>
 
+<!-- TELA OPERAÇÃO -->
 <div id="operacao" class="tela">
-<h2>Leitura</h2>
-<input type="text" id="leitura" autofocus placeholder="Passe o código">
+  <div class="leitura-card">
+    <h2>🔍 Leitura de Código</h2>
+    <p>Passe o código de barras ou QR Code do operador, ou digite manualmente e pressione Enter</p>
+    <input type="text" id="leitura" autofocus="" placeholder="Passe o código ou digite aqui...">
 
-<div id="resultado">
-<h2 id="status"></h2>
-<h1 id="nome"></h1>
-<img id="fotoOperador" alt="Foto do operador">
-<p id="validade"></p>
-</div>
+    <div id="resultado">
+      <img id="fotoOperador" alt="Foto do operador">
+      <h2 id="status"></h2>
+      <h1 id="nome"></h1>
+      <p id="validade"></p>
+    </div>
+  </div>
 </div>
 
+<!-- TELA ADMIN -->
 <div id="admin" class="tela">
-<h2>Cadastro</h2>
-<input type="text" id="nomeCadastro" placeholder="Nome">
-<input type="date" id="validadeCadastro">
-<button onclick="cadastrar()">Cadastrar</button>
-<input type="file" id="fotoCadastro" accept="image/*">
+  <div class="admin-grid">
 
-<h2>Operadores Cadastrados</h2>
-<div id="pesquisaContainer">
-<label for="pesquisaOperador"><strong>Pesquisar:</strong></label>
-<input type="text" id="pesquisaOperador" placeholder="Digite nome ou código do operador">
+    <!-- Formulário Cadastro -->
+    <div class="card">
+      <h2>➕ Cadastrar Operador</h2>
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input type="text" id="nomeCadastro" placeholder="Ex: João da Silva">
+      </div>
+      <div class="form-group">
+        <label>Data de Validade *</label>
+        <input type="date" id="validadeCadastro">
+      </div>
+      <div class="form-group">
+        <label>Foto (opcional)</label>
+        <input type="file" id="fotoCadastro" accept="image/*">
+        <p class="foto-hint">JPG, PNG ou WEBP. Será redimensionada automaticamente.</p>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="cadastrar()">Cadastrar Operador</button>
+    </div>
+
+    <!-- Lista Operadores -->
+    <div class="card">
+      <div class="table-header">
+        <h2>👥 Operadores Cadastrados</h2>
+        <button class="btn btn-export" onclick="exportarCSV()">📥 Exportar CSV</button>
+      </div>
+
+      <div id="pesquisaContainer">
+        <input type="text" id="pesquisaOperador" placeholder="🔎 Pesquisar por nome ou código...">
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Operador</th>
+            <th>Validade</th>
+            <th>Status</th>
+            <th>Acões</th>
+          </tr>
+        </thead>
+        <tbody id="listaOperadores"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum operador encontrado.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 </div>
-<table>
-<thead>
-<tr>
-<th>Código</th>
-<th>Nome</th>
-<th>Validade</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="listaOperadores"></tbody>
-</table>
+
+<!-- Modal Edicão -->
+<div class="modal-overlay" id="modalEditar">
+  <div class="modal">
+    <h3>✏️ Editar Operador</h3>
+    <input type="hidden" id="editarId">
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" id="editarNome" placeholder="Nome do operador">
+    </div>
+    <div class="form-group">
+      <label>Validade</label>
+      <input type="date" id="editarValidade">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEdicao()">Salvar</button>
+    </div>
+  </div>
 </div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <script>
-const senhaAdmin = "1234";
+const senhaAdmin = "1234"; // ⚠️ Troque esta senha por algo mais seguro!
 const STORAGE_KEY = "sq_operadores_local";
 let operadores = {};
 let firebaseDisponivel = false;
@@ -85,19 +623,40 @@ window.firebaseConfig = {
   appId: "SEU_APP_ID"
 };
 
-function gerarCodigo() {
-  return "OP" + Date.now();
+// ── Utilitários ──────────────────────────────────────────────
+
+function toast(msg, tipo = "info") {
+  const t = document.getElementById("toast");
+  const icons = { sucesso: "✅", erro: "❌", aviso: "⚠️", info: "ℹ️" };
+  t.innerHTML = (icons[tipo] || "ℹ️") + " " + msg;
+  t.style.borderColor = tipo === "sucesso" ? "#22c55e" : tipo === "erro" ? "#ef4444" : tipo === "aviso" ? "#f59e0b" : "#334155";
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 3500);
 }
+
+function formatarData(dataStr) {
+  if (!dataStr) return "-";
+  const [ano, mes, dia] = dataStr.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
+function diasAte(dataStr) {
+  const hoje = new Date();
+  const validade = new Date(dataStr + "T00:00:00");
+  const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const validadeSemHora = new Date(validade.getFullYear(), validade.getMonth(), validade.getDate());
+  return Math.round((validadeSemHora - hojeSemHora) / (1000 * 60 * 60 * 24));
+}
+
+function gerarCodigo() { return "OP" + Date.now(); }
+function gerarIdLocal() { return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000); }
 
 function configFirebaseValida() {
   const cfg = window.firebaseConfig || {};
   const valores = [cfg.apiKey, cfg.authDomain, cfg.projectId, cfg.storageBucket, cfg.messagingSenderId, cfg.appId];
-  if (valores.some((v) => !v || typeof v !== "string")) return false;
-  return !valores.some((v) => v.startsWith("SUA_") || v.startsWith("SEU_"));
-}
-
-function gerarIdLocal() {
-  return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+  if (valores.some(v => !v || typeof v !== "string")) return false;
+  return !valores.some(v => v.startsWith("SUA_") || v.startsWith("SEU_"));
 }
 
 function salvarOperadoresLocal() {
@@ -105,14 +664,9 @@ function salvarOperadoresLocal() {
 }
 
 function carregarOperadoresLocal() {
-  const bruto = localStorage.getItem(STORAGE_KEY);
-  if (!bruto) return;
-
   try {
-    operadores = JSON.parse(bruto) || {};
-  } catch (_erro) {
-    operadores = {};
-  }
+    operadores = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch { operadores = {}; }
 }
 
 function lerArquivoComoDataURL(arquivo) {
@@ -124,156 +678,111 @@ function lerArquivoComoDataURL(arquivo) {
   });
 }
 
+// ── Navegacão ──────────────────────────────────────────────
+
 function irOperacao() {
   document.getElementById("operacao").style.display = "block";
   document.getElementById("admin").style.display = "none";
+  document.getElementById("resultado").style.display = "none";
+  document.getElementById("leitura").focus();
 }
 
 function loginAdmin() {
   const senha = prompt("Senha admin:");
   if (senha === null) return;
-
   if (senha === senhaAdmin) {
     document.getElementById("admin").style.display = "block";
     document.getElementById("operacao").style.display = "none";
+    atualizarLista();
   } else {
-    alert("Senha incorreta");
+    toast("Senha incorreta", "erro");
   }
 }
 
-function validar(codigo) {
-  const op = Object.values(operadores).find((o) => o.codigo === codigo);
-  if (!op) {
-    alert("Não encontrado");
-    return;
-  }
+// ── Validacão ──────────────────────────────────────────────
 
+function validar(codigo) {
+  const op = Object.values(operadores).find(o => o.codigo === codigo);
   const resultado = document.getElementById("resultado");
   resultado.style.display = "block";
 
-  const hoje = new Date();
-  const validade = new Date(op.validade);
+  if (!op) {
+    resultado.className = "naoEncontrado";
+    document.getElementById("status").innerText = "❓ NÃO ENCONTRADO";
+    document.getElementById("nome").innerText = "Código não cadastrado";
+    document.getElementById("fotoOperador").style.display = "none";
+    document.getElementById("validade").innerText = "Verifique o código e tente novamente.";
+    return;
+  }
 
-  const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-  const validadeSemHora = new Date(validade.getFullYear(), validade.getMonth(), validade.getDate());
-  const diasDiff = Math.round((validadeSemHora - hojeSemHora) / (1000 * 60 * 60 * 24));
-  const apto = diasDiff >= 0;
+  const dias = diasAte(op.validade);
+  const apto = dias >= 0;
 
   document.getElementById("nome").innerText = op.nome;
 
-  const fotoOperador = document.getElementById("fotoOperador");
+  const fotoEl = document.getElementById("fotoOperador");
   if (op.foto) {
-    fotoOperador.src = op.foto;
-    fotoOperador.style.display = "block";
+    fotoEl.src = op.foto;
+    fotoEl.style.display = "block";
   } else {
-    fotoOperador.removeAttribute("src");
-    fotoOperador.style.display = "none";
+    fotoEl.style.display = "none";
   }
 
   const textoDias = apto
-    ? "Restam " + diasDiff + " dias"
-    : "Venceu há " + Math.abs(diasDiff) + " dias";
+    ? (dias === 0 ? "Vence hoje!" : `Restam ${dias} dia${dias !== 1 ? "s" : ""}`)
+    : `Venceu há ${Math.abs(dias)} dia${Math.abs(dias) !== 1 ? "s" : ""}`;
 
   document.getElementById("validade").innerHTML =
-    "Termina em: " + validade.toLocaleDateString("pt-BR") + "<br>" + textoDias;
+    `Válido até: <strong>${formatarData(op.validade)}</strong><br>${textoDias}`;
 
-  if (apto) {
-    resultado.className = "apto";
-    document.getElementById("status").innerText = "APTO";
-  } else {
-    resultado.className = "naoapto";
-    document.getElementById("status").innerText = "NÃO APTO";
-  }
+  resultado.className = apto ? "apto" : "naoapto";
+  document.getElementById("status").innerText = apto ? "✅ APTO" : "❌ NÃO APTO";
 }
 
-function atualizarLista() {
-  const tbody = document.getElementById("listaOperadores");
-  const termoPesquisa = (document.getElementById("pesquisaOperador")?.value || "").trim().toLowerCase();
-  tbody.innerHTML = "";
-
-  const operadoresFiltrados = Object.entries(operadores).filter(([, op]) => {
-    if (!termoPesquisa) return true;
-    return op.nome.toLowerCase().includes(termoPesquisa) || op.codigo.toLowerCase().includes(termoPesquisa);
-  });
-
-  if (!operadoresFiltrados.length) {
-    tbody.innerHTML = '<tr><td colspan="4">Nenhum operador encontrado.</td></tr>';
-    return;
-  }
-
-  for (const [id, op] of operadoresFiltrados) {
-    const linha = `
-      <tr>
-        <td>${op.codigo}</td>
-        <td>${op.foto ? `<img src="${op.foto}" width="50"><br>` : ""}${op.nome}</td>
-        <td>${op.validade}</td>
-        <td>
-          <button onclick="editar('${id}')">Editar</button>
-          <button onclick="excluirOperador('${id}')">Excluir</button><br>
-          <svg id="bar_${op.codigo}"></svg>
-          <canvas id="qr_${op.codigo}"></canvas>
-        </td>
-      </tr>
-    `;
-    tbody.innerHTML += linha;
-  }
-
-  for (const [, op] of operadoresFiltrados) {
-    JsBarcode("#bar_" + op.codigo, op.codigo, { width: 2, height: 40 });
-    const url = window.location.origin + window.location.pathname + "?codigo=" + op.codigo;
-    QRCode.toCanvas(document.getElementById("qr_" + op.codigo), url, { width: 80 });
-  }
-}
+// ── Cadastro ───────────────────────────────────────────────
 
 async function cadastrar() {
-  const nome = document.getElementById("nomeCadastro").value;
+  const nome = document.getElementById("nomeCadastro").value.trim();
   const validade = document.getElementById("validadeCadastro").value;
   const fotoArquivo = document.getElementById("fotoCadastro").files[0];
 
-  if (!nome || !validade || !fotoArquivo) {
-    alert("Preencha tudo");
+  if (!nome || !validade) {
+    toast("Preencha nome e data de validade", "aviso");
     return;
+  }
+
+  let foto = null;
+  if (fotoArquivo) {
+    foto = await lerArquivoComoDataURL(fotoArquivo);
   }
 
   const cadastrarLocal = async () => {
     const id = gerarIdLocal();
     const codigo = gerarCodigo();
-    const foto = await lerArquivoComoDataURL(fotoArquivo);
-
-    operadores[id] = {
-      codigo,
-      nome,
-      validade,
-      foto,
-      criadoEm: new Date().toISOString()
-    };
-
+    operadores[id] = { codigo, nome, validade, foto, criadoEm: new Date().toISOString() };
     salvarOperadoresLocal();
     atualizarLista();
+    toast(`Operador "${nome}" cadastrado! Código: ${codigo}`, "sucesso");
   };
 
   if (firebaseDisponivel && firebaseApi) {
     try {
       const codigo = gerarCodigo();
-      const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
-      await firebaseApi.uploadBytes(storageRef, fotoArquivo);
-      const fotoURL = await firebaseApi.getDownloadURL(storageRef);
-
+      let fotoURL = null;
+      if (fotoArquivo) {
+        const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
+        await firebaseApi.uploadBytes(storageRef, fotoArquivo);
+        fotoURL = await firebaseApi.getDownloadURL(storageRef);
+      }
       await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-        codigo,
-        nome,
-        validade,
-        foto: fotoURL,
-        criadoEm: new Date()
+        codigo, nome, validade, foto: fotoURL, criadoEm: new Date()
       });
     } catch (erro) {
-      console.error("Falha no cadastro via Firebase, salvando localmente:", erro);
+      console.error("Firebase falhou, salvando local:", erro);
       await cadastrarLocal();
-      alert("Firebase indisponível no momento. Cadastro salvo localmente.");
     }
   } else {
     await cadastrarLocal();
-    alert("Cadastro salvo localmente (Firebase indisponível).\nConfigure firebaseConfig para sincronizar na nuvem.");
   }
 
   document.getElementById("nomeCadastro").value = "";
@@ -281,29 +790,120 @@ async function cadastrar() {
   document.getElementById("fotoCadastro").value = "";
 }
 
-async function editar(id) {
-  const op = operadores[id];
-  const novoNome = prompt("Novo nome:", op.nome);
-  if (novoNome === null) return;
+// ── Lista ────────────────────────────────────────────────
 
-  const novaValidade = prompt("Nova validade (AAAA-MM-DD):", op.validade);
-  if (novaValidade === null) return;
+function atualizarLista() {
+  const tbody = document.getElementById("listaOperadores");
+  const termo = (document.getElementById("pesquisaOperador")?.value || "").trim().toLowerCase();
+  tbody.innerHTML = "";
+
+  const filtrados = Object.entries(operadores).filter(([ , op]) => {
+    if (!termo) return true;
+    return op.nome.toLowerCase().includes(termo) || op.codigo.toLowerCase().includes(termo);
+  });
+
+  if (!filtrados.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum operador encontrado.</td></tr>';
+    return;
+  }
+
+  for (const [id, op] of filtrados) {
+    const dias = diasAte(op.validade);
+    const apto = dias >= 0;
+    let badgeClass, badgeLabel;
+    if (!apto) { badgeClass = "badge-vencido"; badgeLabel = "Vencido"; }
+    else if (dias <= 30) { badgeClass = "badge-aviso"; badgeLabel = `${dias}d restantes`; }
+    else { badgeClass = "badge-ok"; badgeLabel = "Válido"; }
+
+    const fotoHtml = op.foto
+      ? `<img src="${op.foto}" class="operador-foto" alt="">`
+      : `<span style="width:40px;height:40px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:1rem">👤</span>`;
+
+    const linha = `
+      <tr>
+        <td><code style="font-size:0.75rem;color:var(--text-muted)">${op.codigo}</code></td>
+        <td style="display:flex;align-items:center">${fotoHtml}<span>${op.nome}</span></td>
+        <td>${formatarData(op.validade)}</td>
+        <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+        <td>
+          <div class="acoes">
+            <button class="btn btn-edit" onclick="abrirModal('${id}')">Editar</button>
+            <button class="btn btn-danger" onclick="excluirOperador('${id}')">Excluir</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <svg id="bar_${op.codigo}" style="max-width:160px"></svg>
+            <canvas id="qr_${op.codigo}" style="width:70px!important;height:70px!important"></canvas>
+          </div>
+        </td>
+      </tr>`;
+    tbody.innerHTML += linha;
+  }
+
+  for (const [ , op] of filtrados) {
+    try { JsBarcode("#bar_" + op.codigo, op.codigo, { width: 1.5, height: 36, displayValue: false, background: "transparent", lineColor: "#94a3b8" }); } catch {}
+    try {
+      const url = window.location.origin + window.location.pathname + "?codigo=" + op.codigo;
+      QRCode.toCanvas(document.getElementById("qr_" + op.codigo), url, { width: 70, color: { dark: "#f1f5f9", light: "#00000000" } });
+    } catch {}
+  }
+}
+
+// ── Exportar CSV ─────────────────────────────────────────────
+
+function exportarCSV() {
+  const linhas = [["Código", "Nome", "Validade", "Status"]];
+  for (const op of Object.values(operadores)) {
+    const dias = diasAte(op.validade);
+    const status = dias < 0 ? "Vencido" : dias <= 30 ? "Próximo venc." : "Válido";
+    linhas.push([op.codigo, op.nome, formatarData(op.validade), status]);
+  }
+  const csv = linhas.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "operadores.csv";
+  a.click();
+  toast("Arquivo CSV exportado com sucesso!", "sucesso");
+}
+
+// ── Modal Edicão ───────────────────────────────────────
+
+function abrirModal(id) {
+  const op = operadores[id];
+  document.getElementById("editarId").value = id;
+  document.getElementById("editarNome").value = op.nome;
+  document.getElementById("editarValidade").value = op.validade;
+  document.getElementById("modalEditar").classList.add("show");
+}
+
+function fecharModal() {
+  document.getElementById("modalEditar").classList.remove("show");
+}
+
+async function salvarEdicao() {
+  const id = document.getElementById("editarId").value;
+  const novoNome = document.getElementById("editarNome").value.trim();
+  const novaValidade = document.getElementById("editarValidade").value;
+
+  if (!novoNome || !novaValidade) { toast("Preencha todos os campos", "aviso"); return; }
 
   if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
-    await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), {
-      nome: novoNome,
-      validade: novaValidade
-    });
+    await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), { nome: novoNome, validade: novaValidade });
   } else {
     operadores[id].nome = novoNome;
     operadores[id].validade = novaValidade;
     salvarOperadoresLocal();
     atualizarLista();
   }
+  fecharModal();
+  toast(`Operador "${novoNome}" atualizado!`, "sucesso");
 }
 
+// ── Excluir ───────────────────────────────────────────
+
 async function excluirOperador(id) {
-  if (!confirm("Excluir operador?")) return;
+  const op = operadores[id];
+  if (!confirm(`Excluir "${op?.nome}"?`)) return;
 
   if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
     await firebaseApi.deleteDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id));
@@ -312,26 +912,31 @@ async function excluirOperador(id) {
     salvarOperadoresLocal();
     atualizarLista();
   }
+  toast("Operador removido.", "aviso");
 }
 
+// ── Expo global ───────────────────────────────────────
+
 window.cadastrar = cadastrar;
-window.editar = editar;
+window.editar = abrirModal;
 window.excluirOperador = excluirOperador;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.salvarEdicao = salvarEdicao;
+window.exportarCSV = exportarCSV;
 window.configFirebaseValida = configFirebaseValida;
-window.setFirebaseApi = function setFirebaseApi(api) {
+window.setFirebaseApi = function(api) {
   firebaseApi = api;
   firebaseDisponivel = configFirebaseValida();
-
   if (!firebaseDisponivel) return;
-
   firebaseApi.onSnapshot(firebaseApi.funcionariosRef, (snapshot) => {
     operadores = {};
-    snapshot.forEach((docSnap) => {
-      operadores[docSnap.id] = docSnap.data();
-    });
+    snapshot.forEach(docSnap => { operadores[docSnap.id] = docSnap.data(); });
     atualizarLista();
   });
 };
+
+// ── Init ──────────────────────────────────────────────
 
 window.addEventListener("DOMContentLoaded", () => {
   carregarOperadoresLocal();
@@ -340,11 +945,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnOperacao").addEventListener("click", irOperacao);
   document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
   document.getElementById("pesquisaOperador").addEventListener("input", atualizarLista);
-  document.getElementById("leitura").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      validar(this.value.trim());
-      this.value = "";
-    }
+  document.getElementById("modalEditar").addEventListener("click", e => { if (e.target === e.currentTarget) fecharModal(); });
+
+  document.getElementById("leitura").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { validar(this.value.trim()); this.value = ""; }
   });
 
   const params = new URLSearchParams(window.location.search);
@@ -360,32 +964,19 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 
 try {
   if (!window.configFirebaseValida || !window.configFirebaseValida()) {
-    console.warn("Firebase não configurado: usando modo local.");
+    console.warn("Firebase não configurado: modo local ativo.");
   } else {
     const app = initializeApp(window.firebaseConfig);
-  const db = getFirestore(app);
-  const funcionariosRef = collection(db, "funcionarios");
-  const storage = getStorage(app);
-
-    window.setFirebaseApi({
-      db,
-      funcionariosRef,
-      storage,
-      addDoc,
-      updateDoc,
-      deleteDoc,
-      doc,
-      onSnapshot,
-      ref,
-      uploadBytes,
-      getDownloadURL
-    });
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const funcionariosRef = collection(db, "funcionarios");
+    window.setFirebaseApi({ db, funcionariosRef, storage, addDoc, updateDoc, deleteDoc, doc, onSnapshot, ref, uploadBytes, getDownloadURL });
   }
-} catch (erro) {
-  console.error("Falha ao inicializar Firebase:", erro);
+} catch (e) {
+  console.error("Erro Firebase:", e);
 }
 </script>
 
-</body>
-</html>
 
+
+<div id="preact-border-shadow-host" popover="manual" style="border: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div></body></html>
