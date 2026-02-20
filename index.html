@@ -520,6 +520,183 @@
       margin-top: 24px;
     }
 
+    .btn-testar {
+      background: transparent;
+      color: var(--green);
+      border: 1px solid var(--green);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-testar:hover {
+      background: var(--green);
+      color: #000;
+    }
+
+    .btn-cracha {
+      background: transparent;
+      color: #a78bfa;
+      border: 1px solid #a78bfa;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-cracha:hover {
+      background: #a78bfa;
+      color: white;
+    }
+
+    /* ── Crachá ── */
+    .cracha-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0 20px;
+    }
+
+    .cracha {
+      width: 300px;
+      background: #f0f0f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      font-family: Arial, sans-serif;
+      color: #111;
+    }
+
+    .cracha-topo {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 14px 10px 10px;
+    }
+
+    .cracha-topo .titulo {
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .cracha-topo .empresa {
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+
+    .cracha-corpo {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      align-items: flex-start;
+    }
+
+    .cracha-foto {
+      width: 90px;
+      height: 110px;
+      object-fit: cover;
+      border: 2px solid #999;
+      border-radius: 2px;
+      flex-shrink: 0;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .cracha-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cracha-info {
+      flex: 1;
+    }
+
+    .cracha-nome {
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .cracha-detalhe {
+      font-size: 0.68rem;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .cracha-detalhe strong {
+      color: #111;
+    }
+
+    .cracha-status {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .cracha-status.apto {
+      background: #22c55e;
+      color: white;
+    }
+
+    .cracha-status.naoapto {
+      background: #ef4444;
+      color: white;
+    }
+
+    .cracha-barcode {
+      background: white;
+      padding: 8px 16px 6px;
+      text-align: center;
+      border-top: 1px solid #ccc;
+    }
+
+    .cracha-barcode svg {
+      max-width: 100%;
+    }
+
+    .cracha-codigo-texto {
+      font-size: 0.65rem;
+      color: #555;
+      margin-top: 2px;
+      letter-spacing: 1px;
+    }
+
+    @media print {
+      body>*:not(#printArea) {
+        display: none !important;
+      }
+
+      #printArea {
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+      }
+
+      #printArea .cracha {
+        box-shadow: none;
+      }
+
+      .modal-overlay {
+        display: none !important;
+      }
+    }
+
     /* Toast */
     #toast {
       position: fixed;
@@ -660,6 +837,40 @@
       <div class="modal-btns">
         <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
         <button class="btn btn-primary" onclick="salvarEdicao()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Crachá -->
+  <div class="modal-overlay" id="modalCracha">
+    <div class="modal" style="max-width:420px">
+      <h3>🪪 Crachá do Operador</h3>
+      <div class="cracha-wrap">
+        <div class="cracha" id="crachaPreview">
+          <div class="cracha-topo">
+            <div class="titulo">Operador Qualificado</div>
+            <div class="empresa">Sistema de Qualificação</div>
+          </div>
+          <div class="cracha-corpo">
+            <div class="cracha-foto" id="crachaFotoBox">👤</div>
+            <div class="cracha-info">
+              <div class="cracha-nome" id="crachaNome">—</div>
+              <div class="cracha-detalhe">ID: <strong id="crachaId">—</strong></div>
+              <div class="cracha-detalhe">Emitido: <strong id="crachaEmitido">—</strong></div>
+              <div class="cracha-detalhe">Validade: <strong id="crachaValidade">—</strong></div>
+              <span class="cracha-status" id="crachaStatus">—</span>
+            </div>
+          </div>
+          <div class="cracha-barcode">
+            <svg id="crachaBarcode"></svg>
+            <div class="cracha-codigo-texto" id="crachaCodigoTexto"></div>
+          </div>
+        </div>
+      </div>
+      <div id="printArea" style="display:none"></div>
+      <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="fecharModalCracha()">Fechar</button>
+        <button class="btn btn-primary" onclick="imprimirCracha()">🖨️ Imprimir</button>
       </div>
     </div>
   </div>
@@ -920,6 +1131,8 @@
         <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
         <td>
           <div class="acoes">
+            <button class="btn btn-testar" onclick="testarOperador('${op.codigo}')">▶ Testar</button>
+            <button class="btn btn-cracha" onclick="gerarCracha('${id}')">🪪 Crachá</button>
             <button class="btn btn-edit" onclick="abrirModal('${id}')">Editar</button>
             <button class="btn btn-danger" onclick="excluirOperador('${id}')">Excluir</button>
           </div>
@@ -1008,6 +1221,82 @@
       toast("Operador removido.", "aviso");
     }
 
+    // ── Testar ao Vivo ────────────────────────────────────────────
+
+    function testarOperador(codigo) {
+      // Vai para Modo Operação e simula a leitura do código
+      document.getElementById("admin").style.display = "none";
+      document.getElementById("operacao").style.display = "block";
+      const inp = document.getElementById("leitura");
+      inp.value = codigo;
+      // Pequena animação para mostrar que o código foi digitado
+      inp.style.borderColor = "var(--accent)";
+      setTimeout(() => {
+        validar(codigo);
+        inp.value = "";
+        inp.style.borderColor = "";
+        toast("Simulação de leitura realizada!", "sucesso");
+      }, 600);
+    }
+
+    // ── Crachá ────────────────────────────────────────────────────
+
+    function gerarCracha(id) {
+      const op = operadores[id];
+      if (!op) return;
+
+      const dias = diasAte(op.validade);
+      const apto = dias >= 0;
+
+      // Preencher dados no crachá
+      document.getElementById("crachaNome").innerText = op.nome;
+      document.getElementById("crachaId").innerText = op.codigo;
+      document.getElementById("crachaValidade").innerText = formatarData(op.validade);
+      document.getElementById("crachaEmitido").innerText = op.criadoEm
+        ? formatarData(op.criadoEm.split("T")[0])
+        : formatarData(new Date().toISOString().split("T")[0]);
+
+      // Status
+      const statusEl = document.getElementById("crachaStatus");
+      statusEl.innerText = apto ? "APTO" : "NÃO APTO";
+      statusEl.className = "cracha-status " + (apto ? "apto" : "naoapto");
+
+      // Foto
+      const fotoBox = document.getElementById("crachaFotoBox");
+      if (op.foto) {
+        fotoBox.innerHTML = `<img src="${op.foto}" alt="Foto">`;
+      } else {
+        fotoBox.innerHTML = "👤";
+      }
+
+      // Código de barras no crachá
+      try {
+        JsBarcode("#crachaBarcode", op.codigo, {
+          width: 1.5, height: 40, displayValue: false,
+          background: "#ffffff", lineColor: "#111111"
+        });
+      } catch { }
+      document.getElementById("crachaCodigoTexto").innerText = op.codigo;
+
+      document.getElementById("modalCracha").classList.add("show");
+    }
+
+    function fecharModalCracha() {
+      document.getElementById("modalCracha").classList.remove("show");
+    }
+
+    function imprimirCracha() {
+      // Clonar o crachá para a área de impressão e acionar print
+      const clone = document.getElementById("crachaPreview").cloneNode(true);
+      const printArea = document.getElementById("printArea");
+      printArea.innerHTML = "";
+      printArea.style.display = "block";
+      printArea.appendChild(clone);
+      // Re-renderizar barcode dentro do clone (o SVG já está copiado)
+      window.print();
+      setTimeout(() => { printArea.style.display = "none"; }, 1000);
+    }
+
     // ── Expo global ───────────────────────────────────────────────
 
     window.cadastrar = cadastrar;
@@ -1017,6 +1306,10 @@
     window.fecharModal = fecharModal;
     window.salvarEdicao = salvarEdicao;
     window.exportarCSV = exportarCSV;
+    window.testarOperador = testarOperador;
+    window.gerarCracha = gerarCracha;
+    window.fecharModalCracha = fecharModalCracha;
+    window.imprimirCracha = imprimirCracha;
     window.configFirebaseValida = configFirebaseValida;
     window.setFirebaseApi = function (api) {
       firebaseApi = api;
