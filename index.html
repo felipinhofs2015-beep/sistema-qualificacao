@@ -166,8 +166,12 @@ function validar(codigo) {
     fotoOperador.style.display = "none";
   }
 
+  const textoDias = diasRestantes >= 0
+    ? "Restam " + diasRestantes + " dias"
+    : "Venceu há " + Math.abs(diasRestantes) + " dias";
+
   document.getElementById("validade").innerHTML =
-    "Termina em: " + validade.toLocaleDateString("pt-BR") + "<br>Restam " + diasRestantes + " dias";
+    "Termina em: " + validade.toLocaleDateString("pt-BR") + "<br>" + textoDias;
 
   if (validade >= hoje) {
     resultado.className = "apto";
