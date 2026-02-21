@@ -408,7 +408,7 @@
     td {
       padding: 11px 12px;
       border-bottom: 1px solid var(--border);
-      vertical-align: middle;
+      vertical-align: top;
     }
 
     tr:last-child td {
@@ -1131,17 +1131,22 @@
         <td><div style="display:flex;align-items:center;gap:4px">${fotoHtml}<span>${op.nome}</span></div></td>
         <td>${formatarData(op.validade)}</td>
         <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
-        <td>
+        <td style="vertical-align: top;">
           <div class="acoes">
-            <button class="btn btn-testar" onclick="testarOperador('${op.codigo}')">▶ Testar</button>
+            <button class="btn btn-testar" onclick="testarOperador('${op.codigo}')">&#9654; Testar</button>
             <button class="btn btn-cracha" onclick="gerarCracha('${id}')">🪪 Crachá</button>
             <button class="btn btn-edit" onclick="abrirModal('${id}')">Editar</button>
             <button class="btn btn-danger" onclick="excluirOperador('${id}')">Excluir</button>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-            <svg id="bar_${op.codigo}" style="max-width:160px"></svg>
-            <canvas id="qr_${op.codigo}" style="width:70px!important;height:70px!important"></canvas>
-          </div>
+          <details style="margin-top:8px">
+            <summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;user-select:none;list-style:none;display:inline-flex;align-items:center;gap:4px">
+              <span>&#9654;</span> Cód. de barras / QR
+            </summary>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <svg id="bar_${op.codigo}" style="max-width:160px"></svg>
+              <canvas id="qr_${op.codigo}" style="width:70px!important;height:70px!important"></canvas>
+            </div>
+          </details>
         </td>
       </tr>`;
         tbody.innerHTML += linha;
