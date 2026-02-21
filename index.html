@@ -407,11 +407,14 @@
 
     td {
       padding: 11px 12px;
-      border-bottom: 1px solid var(--border);
       vertical-align: top;
     }
 
-    tr:last-child td {
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:last-child {
       border-bottom: none;
     }
 
