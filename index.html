@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init("hFrtuxVQmksRR0qK-");</script>
 
   <style>
     :root {
@@ -794,6 +796,11 @@
           <input type="file" id="fotoCadastro" accept="image/*">
           <p class="foto-hint">JPG, PNG ou WEBP. Será redimensionada automaticamente.</p>
         </div>
+        <div class="form-group">
+          <label>E-mail do Respons&aacute;vel <span style="color:var(--text-muted);font-size:0.75rem">(notificado se
+              n&atilde;o apto)</span></label>
+          <input type="email" id="emailCadastro" placeholder="responsavel@empresa.com">
+        </div>
         <button class="btn btn-primary" style="width:100%" onclick="cadastrar()">Cadastrar Operador</button>
       </div>
 
@@ -1046,6 +1053,25 @@
 
       resultado.className = apto ? "apto" : "naoapto";
       document.getElementById("status").innerText = apto ? "✅ APTO" : "❌ NÃO APTO";
+
+      // ── Enviar e-mail automaticamente se NÃO APTO ──
+      if (!apto && op.emailResponsavel) {
+        const params = {
+          to_email: op.emailResponsavel,
+          to_name: op.emailResponsavel,
+          op_nome: op.nome,
+          op_codigo: op.codigo,
+          op_validade: formatarData(op.validade),
+          dias_vencido: Math.abs(dias),
+          from_name: "Sistema de Qualificação"
+        };
+        emailjs.send("service_yb3a7fh", "template_qualificacao", params, "hFrtuxVQmksRR0qK-")
+          .then(() => toast("📧 E-mail enviado ao responsável!", "sucesso"))
+          .catch(e => {
+            console.error("EmailJS erro:", e);
+            toast("⚠️ Falha ao enviar e-mail: verifique o Template ID", "aviso");
+          });
+      }
     }
 
     // ── Cadastro ─────────────────────────────────────────────────
@@ -1054,6 +1080,7 @@
       const nome = document.getElementById("nomeCadastro").value.trim();
       const validade = document.getElementById("validadeCadastro").value;
       const fotoArquivo = document.getElementById("fotoCadastro").files[0];
+      const emailResponsavel = document.getElementById("emailCadastro").value.trim();
 
       if (!nome || !validade) {
         toast("Preencha nome e data de validade", "aviso");
@@ -1068,7 +1095,7 @@
       const cadastrarLocal = async () => {
         const id = gerarIdLocal();
         const codigo = gerarCodigo();
-        operadores[id] = { codigo, nome, validade, foto, criadoEm: new Date().toISOString() };
+        operadores[id] = { codigo, nome, validade, foto, emailResponsavel, criadoEm: new Date().toISOString() };
         salvarOperadoresLocal();
         atualizarLista();
         toast(`Operador "${nome}" cadastrado! Código: ${codigo}`, "sucesso");
@@ -1084,7 +1111,7 @@
             fotoURL = await firebaseApi.getDownloadURL(storageRef);
           }
           await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-            codigo, nome, validade, foto: fotoURL, criadoEm: new Date()
+            codigo, nome, validade, emailResponsavel, foto: fotoURL, criadoEm: new Date()
           });
         } catch (erro) {
           console.error("Firebase falhou, salvando local:", erro);
@@ -1097,6 +1124,7 @@
       document.getElementById("nomeCadastro").value = "";
       document.getElementById("validadeCadastro").value = "";
       document.getElementById("fotoCadastro").value = "";
+      document.getElementById("emailCadastro").value = "";
     }
 
     // ── Lista ────────────────────────────────────────────────────
