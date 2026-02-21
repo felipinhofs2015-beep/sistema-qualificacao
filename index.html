@@ -937,7 +937,11 @@
       return Math.round((validadeSemHora - hojeSemHora) / (1000 * 60 * 60 * 24));
     }
 
-    function gerarCodigo() { return "OP" + Date.now(); }
+    function gerarCodigo() {
+      const ano = new Date().getFullYear();
+      const seq = String(Object.keys(operadores).length + 1).padStart(4, "0");
+      return "OP" + ano + seq;
+    }
     function gerarIdLocal() { return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000); }
 
     function configFirebaseValida() {
