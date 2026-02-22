@@ -961,8 +961,22 @@
       return !valores.some(v => v.startsWith("SUA_") || v.startsWith("SEU_"));
     }
 
-    function salvarOperadoresLocal() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(operadores));
+    function salvarOperadoresLocal(semFotos) {
+      try {
+        const dados = semFotos
+          ? JSON.stringify(Object.fromEntries(Object.entries(operadores).map(([k, v]) => [k, { ...v, foto: null }])))
+          : JSON.stringify(operadores);
+        localStorage.setItem(STORAGE_KEY, dados);
+      } catch (e) {
+        if (!semFotos) {
+          // localStorage cheio: tenta salvar sem fotos
+          console.warn("localStorage cheio, salvando sem fotos:", e);
+          salvarOperadoresLocal(true);
+          toast("⚠️ Armazenamento cheio: fotos antigas removidas para liberar espaço.", "aviso");
+        } else {
+          throw new Error("Armazenamento local cheio. Exclua operadores antigos.");
+        }
+      }
     }
 
     function carregarOperadoresLocal() {
@@ -972,55 +986,39 @@
     }
 
     function lerArquivoComoDataURL(arquivo) {
-      // Limite de 8MB para evitar travar o navegador
-      if (arquivo.size > 8 * 1024 * 1024) {
-        return Promise.reject(new Error("Arquivo muito grande. Use uma imagem menor que 8MB."));
+      if (arquivo.size > 10 * 1024 * 1024) {
+        return Promise.reject(new Error("Arquivo muito grande. Use uma imagem menor que 10MB."));
       }
       return new Promise((resolve, reject) => {
         let settled = false;
-        const done = (fn) => (...args) => { if (!settled) { settled = true; fn(...args); } };
-        const res = done(resolve);
-        const rej = done(reject);
+        const fim = (fn, val) => { if (!settled) { settled = true; URL.revokeObjectURL(objUrl); fn(val); } };
 
-        // Timeout de segurança: se nada acontecer em 15s, rejeita
-        const timer = setTimeout(() => rej(new Error("Tempo esgotado ao processar imagem.")), 15000);
+        // Timeout de 8 segundos
+        const timer = setTimeout(() => fim(reject, new Error("Tempo esgotado ao processar a imagem.")), 8000);
 
-        const reader = new FileReader();
-        reader.onerror = () => { clearTimeout(timer); rej(new Error("Falha ao ler imagem.")); };
-        reader.onload = (e) => {
-          const originalDataUrl = e.target.result;
+        // createObjectURL é MUITO mais confiável que DataURL para img.onload
+        const objUrl = URL.createObjectURL(arquivo);
+        const img = new Image();
+
+        img.onerror = () => { clearTimeout(timer); fim(reject, new Error("Não foi possível carregar a imagem.")); };
+
+        img.onload = () => {
+          clearTimeout(timer);
           try {
-            const img = new Image();
-            img.onerror = () => {
-              clearTimeout(timer);
-              // Fallback: retorna o arquivo original sem redimensionar
-              res(originalDataUrl);
-            };
-            img.onload = () => {
-              try {
-                const MAX = 400;
-                let w = img.width, h = img.height;
-                if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
-                else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
-                const canvas = document.createElement("canvas");
-                canvas.width = w; canvas.height = h;
-                canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-                const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-                clearTimeout(timer);
-                res(dataUrl);
-              } catch (canvasErr) {
-                clearTimeout(timer);
-                // Canvas falhou (ex: imagem muito grande) → retorna original
-                res(originalDataUrl);
-              }
-            };
-            img.src = originalDataUrl;
+            const MAX = 400;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+            else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            fim(resolve, canvas.toDataURL("image/jpeg", 0.75));
           } catch (err) {
-            clearTimeout(timer);
-            res(originalDataUrl);
+            fim(reject, err);
           }
         };
-        reader.readAsDataURL(arquivo);
+
+        img.src = objUrl;
       });
     }
 
