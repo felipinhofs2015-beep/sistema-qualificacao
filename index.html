@@ -955,6 +955,9 @@
     function gerarIdLocal() { return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000); }
 
     function configFirebaseValida() {
+      // Firebase Storage bloqueia uploads via CORS quando aberto como file://
+      // Nesse caso, usar sempre o modo local (localStorage)
+      if (window.location.protocol === "file:") return false;
       const cfg = window.firebaseConfig || {};
       const valores = [cfg.apiKey, cfg.authDomain, cfg.projectId, cfg.storageBucket, cfg.messagingSenderId, cfg.appId];
       if (valores.some(v => !v || typeof v !== "string")) return false;
