@@ -1159,14 +1159,10 @@
         if (firebaseDisponivel && firebaseApi) {
           try {
             const codigo = gerarCodigo();
-            let fotoURL = null;
-            if (fotoArquivo) {
-              const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
-              await firebaseApi.uploadBytes(storageRef, fotoArquivo);
-              fotoURL = await firebaseApi.getDownloadURL(storageRef);
-            }
+            // Foto já está comprimida (~30-50KB DataURL) — salva direto no Firestore
+            // Firebase Storage removido pois causa CORS ao abrir via GitHub Pages
             await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-              codigo, nome, validade, emailResponsavel, foto: fotoURL, criadoEm: new Date()
+              codigo, nome, validade, emailResponsavel, foto: foto || null, criadoEm: new Date()
             });
           } catch (erro) {
             console.error("Firebase falhou, salvando local:", erro);
