@@ -1564,7 +1564,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     try {
       if (!window.configFirebaseValida || !window.configFirebaseValida()) {
@@ -1572,9 +1571,8 @@
       } else {
         const app = initializeApp(window.firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
         const funcionariosRef = collection(db, "funcionarios");
-        window.setFirebaseApi({ db, funcionariosRef, storage, addDoc, updateDoc, deleteDoc, doc, onSnapshot, ref, uploadBytes, getDownloadURL });
+        window.setFirebaseApi({ db, funcionariosRef, addDoc, updateDoc, deleteDoc, doc, onSnapshot });
       }
     } catch (e) {
       console.error("Erro Firebase:", e);
