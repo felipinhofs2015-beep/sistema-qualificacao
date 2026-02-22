@@ -974,8 +974,22 @@
     function lerArquivoComoDataURL(arquivo) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(new Error("Falha ao ler imagem."));
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Imagem inválida."));
+          img.onload = () => {
+            const MAX = 400;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+            else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", 0.7));
+          };
+          img.src = e.target.result;
+        };
         reader.readAsDataURL(arquivo);
       });
     }
@@ -1087,44 +1101,61 @@
         return;
       }
 
-      let foto = null;
-      if (fotoArquivo) {
-        foto = await lerArquivoComoDataURL(fotoArquivo);
-      }
+      // Desabilitar botão durante o processo para evitar duplo clique
+      const btnCadastrar = document.querySelector('button[onclick="cadastrar()"]');
+      if (btnCadastrar) { btnCadastrar.disabled = true; btnCadastrar.textContent = "Aguarde..."; }
 
-      const cadastrarLocal = async () => {
-        const id = gerarIdLocal();
-        const codigo = gerarCodigo();
-        operadores[id] = { codigo, nome, validade, foto, emailResponsavel, criadoEm: new Date().toISOString() };
-        salvarOperadoresLocal();
-        atualizarLista();
-        toast(`Operador "${nome}" cadastrado! Código: ${codigo}`, "sucesso");
-      };
-
-      if (firebaseDisponivel && firebaseApi) {
-        try {
-          const codigo = gerarCodigo();
-          let fotoURL = null;
-          if (fotoArquivo) {
-            const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
-            await firebaseApi.uploadBytes(storageRef, fotoArquivo);
-            fotoURL = await firebaseApi.getDownloadURL(storageRef);
+      try {
+        let foto = null;
+        if (fotoArquivo) {
+          try {
+            foto = await lerArquivoComoDataURL(fotoArquivo);
+          } catch (erroFoto) {
+            console.error("Erro ao processar foto:", erroFoto);
+            toast("⚠️ Erro ao processar a foto. Operador será cadastrado sem foto.", "aviso");
           }
-          await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-            codigo, nome, validade, emailResponsavel, foto: fotoURL, criadoEm: new Date()
-          });
-        } catch (erro) {
-          console.error("Firebase falhou, salvando local:", erro);
+        }
+
+        const cadastrarLocal = async () => {
+          const id = gerarIdLocal();
+          const codigo = gerarCodigo();
+          operadores[id] = { codigo, nome, validade, foto, emailResponsavel, criadoEm: new Date().toISOString() };
+          salvarOperadoresLocal();
+          atualizarLista();
+          toast(`Operador "${nome}" cadastrado! Código: ${codigo}`, "sucesso");
+        };
+
+        if (firebaseDisponivel && firebaseApi) {
+          try {
+            const codigo = gerarCodigo();
+            let fotoURL = null;
+            if (fotoArquivo) {
+              const storageRef = firebaseApi.ref(firebaseApi.storage, "fotos/" + codigo);
+              await firebaseApi.uploadBytes(storageRef, fotoArquivo);
+              fotoURL = await firebaseApi.getDownloadURL(storageRef);
+            }
+            await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
+              codigo, nome, validade, emailResponsavel, foto: fotoURL, criadoEm: new Date()
+            });
+          } catch (erro) {
+            console.error("Firebase falhou, salvando local:", erro);
+            await cadastrarLocal();
+          }
+        } else {
           await cadastrarLocal();
         }
-      } else {
-        await cadastrarLocal();
-      }
 
-      document.getElementById("nomeCadastro").value = "";
-      document.getElementById("validadeCadastro").value = "";
-      document.getElementById("fotoCadastro").value = "";
-      document.getElementById("emailCadastro").value = "";
+        document.getElementById("nomeCadastro").value = "";
+        document.getElementById("validadeCadastro").value = "";
+        document.getElementById("fotoCadastro").value = "";
+        document.getElementById("emailCadastro").value = "";
+
+      } catch (erroGeral) {
+        console.error("Erro ao cadastrar operador:", erroGeral);
+        toast("❌ Erro ao cadastrar. Tente novamente.", "erro");
+      } finally {
+        if (btnCadastrar) { btnCadastrar.disabled = false; btnCadastrar.textContent = "Cadastrar Operador"; }
+      }
     }
 
     // ── Lista ────────────────────────────────────────────────────
