@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head>
+<html lang="pt-BR">
+
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Qualificação</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -747,20 +749,9 @@
       }
     }
   </style>
-<style id="antigravity-scroll-lock-style">
-  html:root body.antigravity-scroll-lock {
-    overflow: hidden !important;
-  }
-</style><style>
-  body::-webkit-scrollbar {
-    display: none;
-  }
-  html::-webkit-scrollbar {
-    display: none;
-  }
-</style></head>
+</head>
 
-<body class="">
+<body>
 
   <header>
     <h1>⚙️ Sistema de Qualificação</h1>
@@ -775,7 +766,7 @@
     <div class="leitura-card">
       <h2>🔍 Leitura de Código</h2>
       <p>Passe o código de barras ou QR Code do operador, ou digite manualmente e pressione Enter</p>
-      <input type="text" id="leitura" autofocus="" placeholder="Passe o código ou digite aqui...">
+      <input type="text" id="leitura" autofocus placeholder="Passe o código ou digite aqui...">
 
       <div id="resultado">
         <img id="fotoOperador" alt="Foto do operador">
@@ -807,8 +798,8 @@
           <p class="foto-hint">JPG, PNG ou WEBP. Será redimensionada automaticamente.</p>
         </div>
         <div class="form-group">
-          <label>E-mail do Responsável <span style="color:var(--text-muted);font-size:0.75rem">(notificado se
-              não apto)</span></label>
+          <label>E-mail do Respons&aacute;vel <span style="color:var(--text-muted);font-size:0.75rem">(notificado se
+              n&atilde;o apto)</span></label>
           <input type="email" id="emailCadastro" placeholder="responsavel@empresa.com">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="cadastrar()">Cadastrar Operador</button>
@@ -835,7 +826,7 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="listaOperadores"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum operador encontrado.</td></tr></tbody>
+          <tbody id="listaOperadores"></tbody>
         </table>
       </div>
     </div>
@@ -1355,9 +1346,22 @@
       document.getElementById("crachaNome").innerText = op.nome;
       document.getElementById("crachaId").innerText = op.codigo;
       document.getElementById("crachaValidade").innerText = formatarData(op.validade);
-      document.getElementById("crachaEmitido").innerText = op.criadoEm
-        ? formatarData(op.criadoEm.split("T")[0])
-        : formatarData(new Date().toISOString().split("T")[0]);
+      // criadoEm pode ser string ISO ou Timestamp do Firestore {seconds, nanoseconds}
+      let crachaEmitidoStr = "";
+      if (op.criadoEm) {
+        if (typeof op.criadoEm === "string") {
+          crachaEmitidoStr = op.criadoEm.split("T")[0];
+        } else if (op.criadoEm.seconds != null) {
+          crachaEmitidoStr = new Date(op.criadoEm.seconds * 1000).toISOString().split("T")[0];
+        } else if (op.criadoEm.toDate) {
+          crachaEmitidoStr = op.criadoEm.toDate().toISOString().split("T")[0];
+        } else {
+          crachaEmitidoStr = new Date().toISOString().split("T")[0];
+        }
+      } else {
+        crachaEmitidoStr = new Date().toISOString().split("T")[0];
+      }
+      document.getElementById("crachaEmitido").innerText = formatarData(crachaEmitidoStr);
 
       // Foto
       const fotoBox = document.getElementById("crachaFotoBox");
@@ -1609,6 +1613,6 @@
     }
   </script>
 
+</body>
 
-
-<div id="preact-border-shadow-host" popover="manual" style="border: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div></body></html>
+</html>
