@@ -975,6 +975,7 @@
     <h1>⚙️ Sistema de Qualificação</h1>
     <div class="header-btns">
       <button class="btn btn-secondary" id="btnOperacao">🔍 <span>Modo Operação</span></button>
+      <button class="btn btn-secondary" id="btnRegistro">📋 <span>Atividades</span></button>
       <button class="btn btn-primary" id="btnAdmin">🔐 <span>Administração</span></button>
     </div>
   </header>
@@ -1047,16 +1048,40 @@
       </div>
 
       <!-- Log de atividades -->
-      <div class="log-card">
-        <h3>
-          📋 Registro de Atividades
-          <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem" onclick="limparLog()">Limpar</button>
-        </h3>
-        <div id="logList">
-          <div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:16px">Nenhuma atividade registrada.</div>
+      <div class="log-card" style="grid-column:1/-1;background:var(--surface2);border-color:var(--border);padding:16px">
+        <div style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:8px">
+          📋 Últimas atividades visíveis em <strong style="color:var(--accent)">Atividades</strong> (botão no topo)
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- TELA REGISTRO DE ATIVIDADES -->
+  <div id="registro" class="tela">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div>
+        <h2 style="font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
+          📋 Registro de Atividades
+        </h2>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico completo de operações da esteira nesta sessão.</p>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);text-align:right">
+        <span id="registroContador">0 registro(s)</span>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <!-- Legenda -->
+      <div style="display:flex;gap:20px;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:0.78rem;color:var(--text-muted);flex-wrap:wrap">
+        <span><span class="log-dot verde" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Esteira Liberada</span>
+        <span><span class="log-dot vermelho" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Bloqueio / Acesso Negado</span>
+        <span><span class="log-dot amarelo" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Sessão Encerrada / Renovada</span>
+      </div>
+      <!-- Lista do log -->
+      <div id="logList" style="max-height:60vh;overflow-y:auto;padding:8px 0">
+        <div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:32px">Nenhuma atividade registrada.</div>
+      </div>
     </div>
   </div>
 
@@ -1433,6 +1458,7 @@
     window.selecionarTurnoCustom = selecionarTurnoCustom;
     window.encerrarSessao = encerrarSessao;
     window.limparLog = limparLog;
+    window.abrirRegistro = abrirRegistro;
 
     window.firebaseConfig = {
       apiKey: "AIzaSyCQYFMqG1eGU6nZKls4dDW4Fma61vR2BpA",
@@ -1695,12 +1721,24 @@
     function irOperacao() {
       document.getElementById("operacao").style.display = "block";
       document.getElementById("admin").style.display = "none";
+      document.getElementById("registro").style.display = "none";
       document.getElementById("resultado").style.display = "none";
       document.getElementById("leitura").focus();
     }
 
+    function abrirRegistro() {
+      // Abre modal de senha antes de exibir o registro
+      const input = document.getElementById("inputSenhaAdmin");
+      _senhaDestino = 'registro';
+      input.value = "";
+      document.getElementById("senhaErro").style.display = "none";
+      document.getElementById("modalSenha").classList.add("show");
+      setTimeout(() => input.focus(), 100);
+    }
+
     function loginAdmin() {
       const input = document.getElementById("inputSenhaAdmin");
+      _senhaDestino = 'admin';
       input.value = "";
       document.getElementById("senhaErro").style.display = "none";
       document.getElementById("modalSenha").classList.add("show");
@@ -1711,18 +1749,36 @@
       document.getElementById("modalSenha").classList.remove("show");
     }
 
+    let _senhaDestino = 'admin'; // 'admin' ou 'registro'
+
     function confirmarSenhaAdmin() {
       const senha = document.getElementById("inputSenhaAdmin").value;
       if (senha === senhaAdmin) {
         fecharModalSenha();
-        document.getElementById("admin").style.display = "block";
-        document.getElementById("operacao").style.display = "none";
-        atualizarLista();
+        if (_senhaDestino === 'registro') {
+          document.getElementById("operacao").style.display = "none";
+          document.getElementById("admin").style.display = "none";
+          document.getElementById("registro").style.display = "block";
+          atualizarContadorRegistro();
+        } else {
+          document.getElementById("admin").style.display = "block";
+          document.getElementById("operacao").style.display = "none";
+          document.getElementById("registro").style.display = "none";
+          atualizarLista();
+        }
       } else {
         document.getElementById("senhaErro").style.display = "block";
         document.getElementById("inputSenhaAdmin").value = "";
         document.getElementById("inputSenhaAdmin").focus();
       }
+    }
+
+    function atualizarContadorRegistro() {
+      const lista = document.getElementById('logList');
+      const el = document.getElementById('registroContador');
+      if (!el || !lista) return;
+      const total = lista.querySelectorAll('.log-item').length;
+      el.textContent = `${total} registro${total !== 1 ? 's' : ''}`;
     }
 
     function verificarLocalOperacao() {
@@ -2407,6 +2463,7 @@
 
       document.getElementById("btnOperacao").addEventListener("click", irOperacao);
       document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
+      document.getElementById("btnRegistro").addEventListener("click", abrirRegistro);
       document.getElementById("pesquisaOperador").addEventListener("input", atualizarLista);
       document.getElementById("modalEditar").addEventListener("click", e => { if (e.target === e.currentTarget) fecharModal(); });
 
