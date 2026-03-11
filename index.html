@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script>emailjs.init("hFrtuxVQmksRR0qK-");</script>
 
   <style>
@@ -1059,29 +1060,81 @@
 
   <!-- TELA REGISTRO DE ATIVIDADES -->
   <div id="registro" class="tela">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div>
         <h2 style="font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
-          📋 Registro de Atividades
+          📊 Registro de Atividades
         </h2>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico completo de operações da esteira nesta sessão.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da esteira nesta sessão.</p>
       </div>
-      <div style="font-size:0.8rem;color:var(--text-muted);text-align:right">
-        <span id="registroContador">0 registro(s)</span>
+      <span id="registroContador" style="font-size:0.8rem;color:var(--text-muted)">0 registro(s)</span>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--green)" id="kpiLiberacoes">0</div>
+        <div style="font-size:0.75rem;color:var(--green);margin-top:2px">✅ Liberações</div>
+      </div>
+      <div style="background:var(--red-bg);border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--red)" id="kpiBloqueios">0</div>
+        <div style="font-size:0.75rem;color:var(--red);margin-top:2px">🔴 Bloqueios</div>
+      </div>
+      <div style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--yellow)" id="kpiEncerramentos">0</div>
+        <div style="font-size:0.75rem;color:var(--yellow);margin-top:2px">⏹ Encerramentos</div>
       </div>
     </div>
 
-    <div class="card" style="padding:0;overflow:hidden">
-      <!-- Legenda -->
-      <div style="display:flex;gap:20px;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:0.78rem;color:var(--text-muted);flex-wrap:wrap">
-        <span><span class="log-dot verde" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Esteira Liberada</span>
-        <span><span class="log-dot vermelho" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Bloqueio / Acesso Negado</span>
-        <span><span class="log-dot amarelo" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Sessão Encerrada / Renovada</span>
+    <!-- Grid principal: gráficos | log -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+      <!-- Coluna esquerda: gráficos -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Gráfico rosca -->
+        <div class="card" style="padding:20px">
+          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Distribuição de Eventos</h3>
+          <div style="position:relative;max-width:240px;margin:0 auto">
+            <canvas id="chartRosca"></canvas>
+          </div>
+          <!-- Legenda customizada -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;font-size:0.8rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span> Liberações</span>
+              <strong id="legVerde" style="color:var(--green)">0</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span> Bloqueios</span>
+              <strong id="legVermelho" style="color:var(--red)">0</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span> Encerramentos</span>
+              <strong id="legAmarelo" style="color:var(--yellow)">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico barras por hora -->
+        <div class="card" style="padding:20px">
+          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Atividade por Hora</h3>
+          <canvas id="chartBarras" style="max-height:200px"></canvas>
+        </div>
       </div>
-      <!-- Lista do log -->
-      <div id="logList" style="max-height:60vh;overflow-y:auto;padding:8px 0">
-        <div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:32px">Nenhuma atividade registrada.</div>
+
+      <!-- Coluna direita: log -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap">
+          <span><span class="log-dot verde" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Liberada</span>
+          <span><span class="log-dot vermelho" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Bloqueio</span>
+          <span><span class="log-dot amarelo" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Encerrada</span>
+        </div>
+        <div id="logList" style="max-height:calc(100vh - 340px);overflow-y:auto;padding:6px 0">
+          <div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:32px">Nenhuma atividade registrada.</div>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -1431,6 +1484,10 @@
       }
     }
 
+    // contadores de eventos para os gráficos
+    let _logContagem = { verde: 0, vermelho: 0, amarelo: 0 };
+    let _logPorHora = {}; // { "HH": count }
+
     function adicionarLog(cor, msg) {
       const lista = document.getElementById('logList');
       if (!lista) return;
@@ -1438,20 +1495,122 @@
       const placeholder = lista.querySelector('div[style*="text-align:center"]');
       if (placeholder) placeholder.remove();
 
-      const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const agora = new Date();
+      const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const item = document.createElement('div');
       item.className = 'log-item';
+      item.dataset.cor = cor;
+      item.dataset.hora = agora.getHours();
       item.innerHTML = `
         <span class="log-hora">${hora}</span>
         <span class="log-dot ${cor}"></span>
         <span class="log-msg">${msg}</span>`;
       lista.insertBefore(item, lista.firstChild);
       while (lista.children.length > 50) lista.removeChild(lista.lastChild);
+
+      // Atualizar contadores
+      if (_logContagem[cor] !== undefined) _logContagem[cor]++;
+      const hKey = String(agora.getHours()).padStart(2, '0') + 'h';
+      _logPorHora[hKey] = (_logPorHora[hKey] || 0) + 1;
+
+      atualizarGraficos();
     }
 
     function limparLog() {
       const lista = document.getElementById('logList');
       if (lista) lista.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:16px">Nenhuma atividade registrada.</div>';
+      _logContagem = { verde: 0, vermelho: 0, amarelo: 0 };
+      _logPorHora = {};
+      atualizarGraficos();
+    }
+
+    // ── GRÁFICOS ─────────────────────────────────────────────────
+    let _chartRosca = null;
+    let _chartBarras = null;
+
+    function inicializarGraficos() {
+      const cfgBase = {
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        animation: { duration: 400 }
+      };
+
+      // Rosca
+      const ctxR = document.getElementById('chartRosca');
+      if (ctxR && !_chartRosca) {
+        _chartRosca = new Chart(ctxR, {
+          type: 'doughnut',
+          data: {
+            labels: ['Liberações','Bloqueios','Encerramentos'],
+            datasets: [{
+              data: [0, 0, 0],
+              backgroundColor: ['rgba(34,197,94,0.85)','rgba(239,68,68,0.85)','rgba(245,158,11,0.85)'],
+              borderColor: ['#22c55e','#ef4444','#f59e0b'],
+              borderWidth: 2,
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            ...cfgBase,
+            cutout: '65%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ` ${ctx.label}: ${ctx.parsed} evento${ctx.parsed !== 1 ? 's' : ''}`
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Barras por hora
+      const ctxB = document.getElementById('chartBarras');
+      if (ctxB && !_chartBarras) {
+        _chartBarras = new Chart(ctxB, {
+          type: 'bar',
+          data: { labels: [], datasets: [{
+            label: 'Eventos',
+            data: [],
+            backgroundColor: 'rgba(59,130,246,0.7)',
+            borderColor: '#3b82f6',
+            borderWidth: 1,
+            borderRadius: 6
+          }]},
+          options: {
+            ...cfgBase,
+            scales: {
+              x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: { ticks: { color: '#94a3b8', stepSize: 1, precision: 0, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+          }
+        });
+      }
+    }
+
+    function atualizarGraficos() {
+      // KPIs
+      const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setEl('kpiLiberacoes', _logContagem.verde);
+      setEl('kpiBloqueios', _logContagem.vermelho);
+      setEl('kpiEncerramentos', _logContagem.amarelo);
+      setEl('legVerde', _logContagem.verde);
+      setEl('legVermelho', _logContagem.vermelho);
+      setEl('legAmarelo', _logContagem.amarelo);
+
+      // Rosca
+      if (_chartRosca) {
+        _chartRosca.data.datasets[0].data = [_logContagem.verde, _logContagem.vermelho, _logContagem.amarelo];
+        _chartRosca.update();
+      }
+
+      // Barras
+      if (_chartBarras) {
+        const horas = Object.keys(_logPorHora).sort();
+        _chartBarras.data.labels = horas;
+        _chartBarras.data.datasets[0].data = horas.map(h => _logPorHora[h]);
+        _chartBarras.update();
+      }
     }
 
     window.selecionarTurno = selecionarTurno;
@@ -1779,6 +1938,9 @@
       if (!el || !lista) return;
       const total = lista.querySelectorAll('.log-item').length;
       el.textContent = `${total} registro${total !== 1 ? 's' : ''}`;
+      // Inicializa os gráficos na primeira abertura e atualiza os dados
+      inicializarGraficos();
+      atualizarGraficos();
     }
 
     function verificarLocalOperacao() {
