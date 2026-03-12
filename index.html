@@ -975,7 +975,7 @@
   <header>
     <h1>⚙️ Sistema de Qualificação</h1>
     <div class="header-btns">
-      <button class="btn btn-secondary" id="btnConnectSerial" style="color: var(--accent); border-color: var(--accent);" onclick="connectSerial()">🔌 <span>Conectar Esteira</span></button>
+      <button class="btn btn-secondary" id="btnConnectSerial" style="color: var(--accent); border-color: var(--accent);" onclick="connectSerial()">🔌 <span>Conectar Máquina</span></button>
       <button class="btn btn-secondary" id="btnOperacao">🔍 <span>Modo Operação</span></button>
       <button class="btn btn-secondary" id="btnRegistro">📋 <span>Atividades</span></button>
       <button class="btn btn-primary" id="btnAdmin">🔐 <span>Administração</span></button>
@@ -985,13 +985,13 @@
   <!-- TELA OPERAÇÃO -->
   <div id="operacao" class="tela">
     <div class="leitura-card">
-      <h2>⚙️ Painel de Controle da Esteira</h2>
+      <h2>⚙️ Painel de Controle do Posto</h2>
       <select id="localOperacaoAtual" onchange="verificarLocalOperacao()">
         <option value="">-- Selecione o Posto de Trabalho --</option>
       </select>
 
       <div id="leituraArea" style="display:none; margin-top:16px;">
-        <p>Passe o crachá do operador para liberar a esteira. O sistema encerrará a sessão automaticamente ao fim do turno.</p>
+        <p>Passe o crachá do operador para liberar a máquina. O sistema encerrará a sessão automaticamente ao fim do turno.</p>
         <input type="text" id="leitura" placeholder="📶 Aguardando leitura do crachá...">
       </div>
 
@@ -1067,7 +1067,7 @@
         <h2 style="font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
           📊 Registro de Atividades
         </h2>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da esteira nesta sessão.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da máquina nesta sessão.</p>
       </div>
       <span id="registroContador" style="font-size:0.8rem;color:var(--text-muted)">0 registro(s)</span>
     </div>
@@ -1217,7 +1217,7 @@
       <div class="card">
         <h2>⏱️ Configuração de Turnos</h2>
         <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">
-          Defina a duração do turno. A esteira será bloqueada automaticamente quando o tempo expirar, obrigando o operador a bipar o crachá novamente.
+          Defina a duração do turno. A máquina será bloqueada automaticamente quando o tempo expirar, obrigando o operador a bipar o crachá novamente.
         </p>
 
         <div class="turno-grid">
@@ -1240,7 +1240,7 @@
         </div>
 
         <div style="margin-top:12px;font-size:0.75rem;color:var(--text-muted);line-height:1.6;padding:10px;border:1px dashed var(--border);border-radius:8px">
-          ⚠️ Se o operador <strong>não estiver apto</strong> para o posto selecionado (sem qualificação ou com qualificação vencida), a esteira ficará <strong>bloqueada</strong> mesmo que tente bipar novamente.
+          ⚠️ Se o operador <strong>não estiver apto</strong> para o posto selecionado (sem qualificação ou com qualificação vencida), a máquina ficará <strong>bloqueada</strong> mesmo que tente bipar novamente.
         </div>
       </div>
     </div>
@@ -1378,7 +1378,7 @@
 
       atualizarPainelEsteira('ativo', op.nome, postoNome);
       atualizarInfoTurno(agora, fimPrevisto);
-      adicionarLog('verde', `✅ Esteira LIBERADA — ${op.nome} | Posto: ${postoNome} | Turno: ${getTurnoLabel()}`);
+      adicionarLog('verde', `✅ MÁQUINA LIBERADA — ${op.nome} | Posto: ${postoNome} | Turno: ${getTurnoLabel()}`);
       sendSerialCommand("LIBERAR\n");
 
       timerInterval = setInterval(atualizarTimer, 1000);
@@ -1395,12 +1395,12 @@
         if (motivo === 'expirado') {
           atualizarPainelEsteira('bloqueado', null, null);
           document.getElementById('esteiraOpSub').textContent = 'Turno encerrado — bipar crachá para reiniciar';
-          adicionarLog('vermelho', `🔴 Esteira BLOQUEADA — Turno encerrado automaticamente (${nomeOp} | ${postoOp})`);
-          toast(`Turno encerrado! Esteira bloqueada. ${nomeOp} deve bipar novamente.`, 'aviso');
+          adicionarLog('vermelho', `🔴 MÁQUINA BLOQUEADA — Turno encerrado automaticamente (${nomeOp} | ${postoOp})`);
+          toast(`Turno encerrado! Máquina bloqueada. ${nomeOp} deve bipar novamente.`, 'aviso');
         } else if (motivo === 'manual') {
           atualizarPainelEsteira('aguardando', null, null);
           adicionarLog('amarelo', `⏹ Sessão encerrada manualmente (${nomeOp})`);
-          toast('Sessão encerrada. Esteira aguardando nova leitura.', 'info');
+          toast('Sessão encerrada. Máquina aguardando nova leitura.', 'info');
         }
         sendSerialCommand("BLOQUEAR\n");
         atualizarInfoTurno(null, null);
@@ -1447,7 +1447,7 @@
       card.className = 'esteira-status-card estado-' + estado;
       if (estado === 'ativo') {
         icone.textContent = '✅';
-        label.textContent = 'ESTEIRA LIBERADA';
+        label.textContent = 'MÁQUINA LIBERADA';
         opNome.textContent = nomeOp || '—';
         opSub.textContent = postoNome ? `Operador ativo — ${postoNome}` : 'Operador ativo';
         timerWrap.style.display = 'block';
@@ -1455,7 +1455,7 @@
         document.getElementById('timerArco').style.strokeDashoffset = '0';
       } else if (estado === 'bloqueado') {
         icone.textContent = '🔴';
-        label.textContent = 'ESTEIRA BLOQUEADA';
+        label.textContent = 'MÁQUINA BLOQUEADA';
         opNome.textContent = nomeOp || 'Turno encerrado';
         opSub.textContent = 'Operador deve bipar o crachá novamente';
         timerWrap.style.display = 'none';
@@ -1726,8 +1726,8 @@
       if (postos.length === 0) {
         postos = [
           { id: "geral", nome: "Geral" },
-          { id: gerarIdPosto(), nome: "Mesa de Corte" },
-          { id: gerarIdPosto(), nome: "Empilhadeira" }
+          { id: "mesa_corte", nome: "Mesa de Corte" },
+          { id: "empilhadeira", nome: "Empilhadeira" }
         ];
         salvarPostosLocal();
       }
@@ -2002,13 +2002,13 @@
         document.getElementById("status").innerText = "❌ NÃO APTO";
         document.getElementById("validade").innerHTML = `Sem qualificação para: <strong>${postoNome}</strong>.`;
 
-        // Bloqueia esteira
+        // Bloqueia máquina
         if (sessaoAtiva) encerrarSessao('manual', false);
         atualizarPainelEsteira('bloqueado', op.nome, postoNome);
         sendSerialCommand("BLOQUEAR\n");
         document.getElementById('esteiraOpSub').textContent = `Sem qualificação para ${postoNome}`;
         adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} sem qualificação para: ${postoNome}`);
-        toast(`❌ ${op.nome} — SEM qualificação para ${postoNome}. Esteira bloqueada!`, 'erro');
+        toast(`❌ ${op.nome} — SEM qualificação para ${postoNome}. Máquina bloqueada!`, 'erro');
         dispararEmailNaoApto(op, "Sem Qualificação", postoNome);
         setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
         return;
@@ -2028,10 +2028,10 @@
       resultado.className = apto ? "apto" : "naoapto";
       document.getElementById("status").innerText = apto ? "✅ APTO" : "❌ NÃO APTO";
 
-      // ── Lógica da Esteira ─────────────────────────────────────────
+      // ── Lógica da Máquina ─────────────────────────────────────────
       if (apto) {
         iniciarSessao(op, qual.postoNome || postoNome);
-        toast(`✅ ${op.nome} — Esteira LIBERADA por ${getTurnoLabel()} (${postoNome})`, 'sucesso');
+        toast(`✅ ${op.nome} — MÁQUINA LIBERADA por ${getTurnoLabel()} (${postoNome})`, 'sucesso');
       } else {
         if (sessaoAtiva) encerrarSessao('manual', false);
         atualizarPainelEsteira('bloqueado', op.nome, postoNome);
@@ -2678,8 +2678,8 @@
         const textEncoder = new TextEncoderStream();
         const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
         writer = textEncoder.writable.getWriter();
-        toast("✅ Esteira Conectada (Arduino)!", "sucesso");
-        document.getElementById("btnConnectSerial").innerHTML = "🔌 <span>Esteira Conectada</span>";
+        toast("✅ Máquina Conectada (Arduino)!", "sucesso");
+        document.getElementById("btnConnectSerial").innerHTML = "🔌 <span>Máquina Conectada</span>";
         document.getElementById("btnConnectSerial").style.background = "var(--green-bg)";
         document.getElementById("btnConnectSerial").style.borderColor = "var(--green)";
         document.getElementById("btnConnectSerial").style.color = "var(--green)";
@@ -2688,7 +2688,7 @@
         readSerial(port);
       } catch (err) {
         console.error("Erro ao conectar à serial:", err);
-        toast("❌ Erro ao conectar na esteira.", "erro");
+        toast("❌ Erro ao conectar na máquina.", "erro");
       }
     }
 
@@ -2699,10 +2699,10 @@
           console.log("Enviado para Arduino:", cmd);
         } catch (err) {
           console.error("Erro ao enviar comando Serial:", err);
-          toast("Erro na conexão com a esteira.", "erro");
+          toast("Erro na conexão com a máquina.", "erro");
         }
       } else {
-        console.warn("Esteira não conectada. Comando ignorado:", cmd);
+        console.warn("Máquina não conectada. Comando ignorado:", cmd);
       }
     }
 
