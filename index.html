@@ -1229,8 +1229,8 @@
 
         <div class="turno-custom">
           <span style="font-size:0.8rem;color:var(--text-muted)">Personalizado:</span>
-          <input type="number" id="turnoCustomMin" min="1" max="999" placeholder="min">
-          <span style="font-size:0.8rem;color:var(--text-muted)">minutos</span>
+          <input type="number" id="turnoCustomMin" min="0" max="999" placeholder="min" style="width: 60px;">
+          <input type="number" id="turnoCustomSeg" min="0" max="59" placeholder="seg" style="width: 60px;">
           <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.8rem" onclick="selecionarTurnoCustom()">✓ Usar</button>
         </div>
 
@@ -1332,7 +1332,7 @@
     let firebaseApi = null;
 
     // ── SISTEMA DE TURNO / ESTEIRA ───────────────────────────────
-    let turnoDuracaoMin = 240;   // padrão: 4h (manhã)
+    let turnoDuracaoSeg = 14400; // padrão: 4h (14400s)
     let sessaoAtiva = null;      // { codigo, nome, postoNome, inicio, fimPrevisto }
     let timerInterval = null;
     const CIRCUNFERENCIA = 2 * Math.PI * 58; // raio do SVG
@@ -1340,7 +1340,7 @@
     function selecionarTurno(btn, minutos) {
       document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('ativo'));
       btn.classList.add('ativo');
-      turnoDuracaoMin = minutos;
+      turnoDuracaoSeg = minutos * 60;
       const h = Math.floor(minutos / 60), m = minutos % 60;
       const label = h > 0 ? (m > 0 ? `${h}h${m}min` : `${h}h`) : `${m}min`;
       const el = document.getElementById('turnoConfigLabel');
@@ -1349,20 +1349,28 @@
     }
 
     function selecionarTurnoCustom() {
-      const val = parseInt(document.getElementById('turnoCustomMin').value);
-      if (!val || val < 1) { toast('Informe um valor válido em minutos', 'aviso'); return; }
+      const min = parseInt(document.getElementById('turnoCustomMin').value) || 0;
+      const seg = parseInt(document.getElementById('turnoCustomSeg').value) || 0;
+      if (min === 0 && seg === 0) { toast('Informe um valor válido de tempo', 'aviso'); return; }
+      
       document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('ativo'));
-      turnoDuracaoMin = val;
-      const h = Math.floor(val / 60), m = val % 60;
-      const label = h > 0 ? (m > 0 ? `${h}h${m}min` : `${h}h`) : `${m}min`;
+      turnoDuracaoSeg = (min * 60) + seg;
+      
+      const h = Math.floor(min / 60), m = min % 60;
+      let label = "";
+      if (h > 0) label += `${h}h`;
+      if (m > 0) label += `${m}m `;
+      if (seg > 0) label += `${seg}s`;
+      if (!label) label = `${seg}s`; // fallback
+      
       const el = document.getElementById('turnoConfigLabel');
-      if (el) el.textContent = label;
-      toast(`Turno personalizado: ${label}`, 'sucesso');
+      if (el) el.textContent = label.trim();
+      toast(`Turno personalizado: ${label.trim()}`, 'sucesso');
     }
 
     function getTurnoLabel() {
       const el = document.getElementById('turnoConfigLabel');
-      return el ? el.textContent : `${turnoDuracaoMin}min`;
+      return el ? el.textContent : `${turnoDuracaoSeg}s`;
     }
 
     function iniciarSessao(op, postoNome) {
@@ -1373,7 +1381,7 @@
       }
 
       const agora = Date.now();
-      const fimPrevisto = agora + turnoDuracaoMin * 60 * 1000;
+      const fimPrevisto = agora + (turnoDuracaoSeg * 1000);
       sessaoAtiva = { codigo: op.codigo, nome: op.nome, postoNome, inicio: agora, fimPrevisto };
 
       atualizarPainelEsteira('ativo', op.nome, postoNome);
@@ -1412,7 +1420,7 @@
       const restante = sessaoAtiva.fimPrevisto - Date.now();
       if (restante <= 0) { encerrarSessao('expirado'); return; }
 
-      const totalMs = turnoDuracaoMin * 60 * 1000;
+      const totalMs = turnoDuracaoSeg * 1000;
       const fracao = restante / totalMs;
       const offset = CIRCUNFERENCIA * (1 - fracao);
 
@@ -1749,7 +1757,7 @@
 
     function removerPosto(id) {
       if (!confirm("Remover este posto de trabalho?")) return;
-      postos = postos.filter(p => p.id !== id);
+      postos = postos.filter(p => String(p.id) !== String(id));
       salvarPostosLocal();
       toast("Posto removido!", "aviso");
       atualizarInterfacePostos();
