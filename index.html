@@ -1067,9 +1067,13 @@
         <h2 style="font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
           📊 Registro de Atividades
         </h2>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da máquina nesta sessão.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da máquina. Salvo automaticamente.</p>
       </div>
-      <span id="registroContador" style="font-size:0.8rem;color:var(--text-muted)">0 registro(s)</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="registroContador" style="font-size:0.8rem;color:var(--text-muted)">0 registro(s)</span>
+        <button class="btn btn-export" onclick="exportarAtividades()" title="Exportar para Excel">📥 Exportar Excel</button>
+        <button class="btn btn-danger" style="padding:7px 12px;font-size:0.8rem" onclick="limparLog()" title="Limpar histórico">🗑️ Limpar</button>
+      </div>
     </div>
 
     <!-- KPIs -->
@@ -1326,6 +1330,8 @@
     const senhaAdmin = "1234"; // ⚠️ Troque esta senha por algo mais seguro!
     const STORAGE_KEY = "sq_operadores_local";
     const POSTOS_KEY = "sq_postos_local";
+    const POSTOS_INIT_KEY = "sq_postos_inicializado";
+    const LOG_KEY = "sq_log_atividades";
     let operadores = {};
     let postos = [];
     let firebaseDisponivel = false;
@@ -1517,22 +1523,95 @@
         <span class="log-dot ${cor}"></span>
         <span class="log-msg">${msg}</span>`;
       lista.insertBefore(item, lista.firstChild);
-      while (lista.children.length > 50) lista.removeChild(lista.lastChild);
+      while (lista.children.length > 200) lista.removeChild(lista.lastChild);
 
       // Atualizar contadores
       if (_logContagem[cor] !== undefined) _logContagem[cor]++;
       const hKey = String(agora.getHours()).padStart(2, '0') + 'h';
       _logPorHora[hKey] = (_logPorHora[hKey] || 0) + 1;
 
+      // Persistir no localStorage
+      _salvarLogLocal(cor, msg, hora, agora.getHours(), agora.toISOString());
+
       atualizarGraficos();
     }
 
+    function _salvarLogLocal(cor, msg, hora, horaNum, isoTimestamp) {
+      try {
+        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+        entradas.unshift({ cor, msg, hora, horaNum, ts: isoTimestamp });
+        if (entradas.length > 200) entradas.splice(200);
+        localStorage.setItem(LOG_KEY, JSON.stringify(entradas));
+      } catch(e) { console.warn('Erro ao salvar log:', e); }
+    }
+
+    function carregarLogLocal() {
+      try {
+        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+        if (!entradas.length) return;
+
+        const lista = document.getElementById('logList');
+        if (!lista) return;
+        lista.innerHTML = '';
+
+        entradas.forEach(e => {
+          const item = document.createElement('div');
+          item.className = 'log-item';
+          item.dataset.cor = e.cor;
+          item.dataset.hora = e.horaNum;
+          item.innerHTML = `
+            <span class="log-hora">${e.hora}</span>
+            <span class="log-dot ${e.cor}"></span>
+            <span class="log-msg">${e.msg}</span>`;
+          lista.appendChild(item);
+
+          // Rebuilding counters
+          if (_logContagem[e.cor] !== undefined) _logContagem[e.cor]++;
+          const hKey = String(e.horaNum).padStart(2, '0') + 'h';
+          _logPorHora[hKey] = (_logPorHora[hKey] || 0) + 1;
+        });
+
+        atualizarGraficos();
+      } catch(e) { console.warn('Erro ao carregar log:', e); }
+    }
+
     function limparLog() {
+      if (!confirm('Limpar todo o histórico de atividades?')) return;
       const lista = document.getElementById('logList');
       if (lista) lista.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:16px">Nenhuma atividade registrada.</div>';
       _logContagem = { verde: 0, vermelho: 0, amarelo: 0 };
       _logPorHora = {};
+      try { localStorage.removeItem(LOG_KEY); } catch(e) {}
       atualizarGraficos();
+      toast('Histórico de atividades limpo.', 'aviso');
+    }
+
+    function exportarAtividades() {
+      try {
+        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+        if (!entradas.length) { toast('Nenhuma atividade para exportar.', 'aviso'); return; }
+
+        const tipoMap = { verde: 'Liberação', vermelho: 'Bloqueio', amarelo: 'Encerramento' };
+        const linhas = [['Data', 'Hora', 'Tipo', 'Mensagem']];
+
+        entradas.forEach(e => {
+          const d = e.ts ? new Date(e.ts) : new Date();
+          const data = d.toLocaleDateString('pt-BR');
+          const tipo = tipoMap[e.cor] || e.cor;
+          // Limpa emojis e símbolos do início da mensagem para o CSV
+          const msgLimpa = e.msg.replace(/^[\p{Emoji}\s]+/u, '').trim();
+          linhas.push([data, e.hora, tipo, msgLimpa]);
+        });
+
+        const csv = linhas.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const dataHoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+        a.download = `atividades_${dataHoje}.csv`;
+        a.click();
+        toast('Arquivo exportado com sucesso! Abra no Excel.', 'sucesso');
+      } catch(e) { toast('Erro ao exportar atividades.', 'erro'); console.error(e); }
     }
 
     // ── GRÁFICOS ─────────────────────────────────────────────────
@@ -1730,15 +1809,21 @@
         postos = JSON.parse(localStorage.getItem(POSTOS_KEY)) || [];
       } catch { postos = []; }
 
-      // Se estiver vazio e houver operador antigo migrado, adiciona 'geral' por segurança
-      if (postos.length === 0) {
-        postos = [
-          { id: "geral", nome: "Geral" },
-          { id: "mesa_corte", nome: "Mesa de Corte" },
-          { id: "empilhadeira", nome: "Empilhadeira" }
-        ];
-        salvarPostosLocal();
+      // Só insere padrões na PRIMEIRA vez (antes de qualquer inicialização)
+      const jaInicializado = localStorage.getItem(POSTOS_INIT_KEY) === "1";
+      if (!jaInicializado) {
+        // Primeira carga: preenche com postos padrão se vier vazio
+        if (postos.length === 0) {
+          postos = [
+            { id: "geral", nome: "Geral" },
+            { id: "mesa_corte", nome: "Mesa de Corte" },
+            { id: "empilhadeira", nome: "Empilhadeira" }
+          ];
+          salvarPostosLocal();
+        }
+        localStorage.setItem(POSTOS_INIT_KEY, "1");
       }
+      // Nas cargas seguintes: usa qualquer que seja o valor salvo (mesmo vazio)
     }
 
     function adicionarPosto() {
@@ -2614,6 +2699,7 @@
     window.fecharModalCracha = fecharModalCracha;
     window.imprimirCracha = imprimirCracha;
     window.configFirebaseValida = configFirebaseValida;
+    window.exportarAtividades = exportarAtividades;
     window.setFirebaseApi = function (api) {
       firebaseApi = api;
       firebaseDisponivel = configFirebaseValida();
@@ -2630,6 +2716,7 @@
     window.addEventListener("DOMContentLoaded", () => {
       carregarPostosLocal();
       carregarOperadoresLocal();
+      carregarLogLocal();
       atualizarLista();
       atualizarInterfacePostos();
 
