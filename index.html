@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
+<html lang="pt-BR"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Qualificação</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script>emailjs.init("hFrtuxVQmksRR0qK-");</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
   <style>
     :root {
@@ -64,7 +62,6 @@
       letter-spacing: -0.5px;
       background: linear-gradient(90deg, #60a5fa, #a78bfa);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -171,95 +168,6 @@
     #operacao {
       display: block;
     }
-
-    /* ── Painel Esteira ── */
-    .esteira-painel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 24px;
-    }
-    @media (max-width: 768px) { .esteira-painel { grid-template-columns: 1fr; } }
-
-    .esteira-status-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      transition: all 0.4s ease;
-    }
-    .esteira-status-card.estado-aguardando { border-color: var(--border); }
-    .esteira-status-card.estado-ativo {
-      border-color: var(--green);
-      box-shadow: 0 0 0 2px rgba(34,197,94,0.15), var(--shadow);
-      animation: pulse-green 3s infinite;
-    }
-    .esteira-status-card.estado-bloqueado {
-      border-color: var(--red);
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.15), var(--shadow);
-    }
-    @keyframes pulse-green {
-      0%, 100% { box-shadow: 0 0 0 2px rgba(34,197,94,0.15), var(--shadow); }
-      50% { box-shadow: 0 0 0 10px rgba(34,197,94,0.05), var(--shadow); }
-    }
-    .esteira-icone { font-size: 3.5rem; margin-bottom: 12px; }
-    .esteira-estado-label { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
-    .estado-aguardando .esteira-estado-label { color: var(--text-muted); }
-    .estado-ativo .esteira-estado-label { color: var(--green); }
-    .estado-bloqueado .esteira-estado-label { color: var(--red); }
-    .esteira-operador-nome { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; color: var(--text); }
-    .esteira-operador-sub { font-size: 0.82rem; color: var(--text-muted); }
-
-    /* Timer circular */
-    .timer-wrap { margin: 20px auto 0; width: 140px; height: 140px; position: relative; }
-    .timer-svg { transform: rotate(-90deg); width: 140px; height: 140px; }
-    .timer-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
-    .timer-arco { fill: none; stroke: var(--green); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.4s; }
-    .timer-arco.aviso { stroke: var(--yellow); }
-    .timer-arco.critico { stroke: var(--red); }
-    .timer-texto {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-weight: 700; font-size: 1.5rem; color: var(--text); line-height: 1.1;
-    }
-    .timer-texto small { font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
-
-    /* Log de Atividades */
-    .log-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
-      grid-column: 1 / -1;
-    }
-    .log-card h3 {
-      font-size: 1rem; font-weight: 600; margin-bottom: 14px; padding-bottom: 10px;
-      border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-    }
-    #logList { max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
-    .log-item { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .log-item:last-child { border-bottom: none; }
-    .log-hora { color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-    .log-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-    .log-dot.verde { background: var(--green); }
-    .log-dot.vermelho { background: var(--red); }
-    .log-dot.amarelo { background: var(--yellow); }
-    .log-msg { flex: 1; color: var(--text); }
-
-    /* Turno config (no Admin) */
-    .turno-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .turno-btn {
-      padding: 10px; border: 1px solid var(--border); border-radius: 8px;
-      background: var(--surface2); color: var(--text); font-size: 0.8rem;
-      cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'Inter', sans-serif;
-    }
-    .turno-btn:hover, .turno-btn.ativo { border-color: var(--accent); background: rgba(59,130,246,0.1); color: var(--accent); }
-    .turno-custom { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
-    .turno-custom input[type='number'] {
-      width: 80px; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; text-align: center;
-    }
-    .turno-custom input:focus { outline: none; border-color: var(--accent); }
 
     /* ── Tela de Leitura ── */
     .leitura-card {
@@ -370,7 +278,71 @@
       line-height: 1.6;
     }
 
-    /* ── Admin ── */
+    /* ── Admin (Layout Gamificacao) ── */
+    #admin.tela {
+      max-width: 1400px;
+    }
+    .admin-layout {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+    }
+    .admin-sidebar {
+      width: 250px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+      position: sticky;
+      top: 100px;
+    }
+    .admin-sidebar h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      padding-left: 8px;
+    }
+    .admin-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-btn:hover { background: var(--surface2); }
+    .nav-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59,130,246, 0.3);
+    }
+    .admin-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .admin-view {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .admin-view.active { display: block; }
+    
+    /* Grid original do Cadastro x Lista */
     .admin-grid {
       display: grid;
       grid-template-columns: 360px 1fr;
@@ -412,8 +384,7 @@
     .form-group input[type="text"],
     .form-group input[type="date"],
     .form-group input[type="email"],
-    .form-group input[type="file"],
-    .form-group select {
+    .form-group input[type="file"] {
       width: 100%;
       padding: 10px 14px;
       background: var(--surface2);
@@ -441,81 +412,6 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 4px;
-    }
-
-    .qualificacao-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-      background: rgba(0, 0, 0, 0.1);
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px dashed var(--border);
-    }
-
-    .qualificacao-row input[type="date"],
-    .qualificacao-row select {
-      flex: 1;
-      margin-bottom: 0 !important;
-      padding: 8px 10px !important;
-      font-size: 0.85rem !important;
-    }
-
-    .btn-remove-qual {
-      background: transparent;
-      color: var(--red);
-      border: 1px solid var(--red);
-      border-radius: 6px;
-      width: 28px;
-      height: 28px;
-      font-size: 0.85rem;
-      line-height: 1;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-
-    .btn-remove-qual:hover {
-      background: var(--red);
-      color: white;
-    }
-
-    #localOperacaoAtual {
-      width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 20px;
-      background: var(--surface2);
-      border: 2px solid var(--accent);
-      border-radius: 8px;
-      color: var(--text);
-      font-weight: 600;
-      font-size: 1rem;
-      text-align: center;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .posto-tag,
-    .posto-item {
-      display: inline-flex;
-      align-items: center;
-      background: var(--surface2);
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      margin-right: 6px;
-      margin-bottom: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .posto-item {
-      justify-content: space-between;
-      width: 100%;
-      padding: 8px 12px;
     }
 
     /* ── Tabela ── */
@@ -719,58 +615,6 @@
       color: white;
     }
 
-    /* ── Multi-email ── */
-    .email-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .email-row input {
-      flex: 1;
-      margin-bottom: 0 !important;
-    }
-
-    .btn-remove-email {
-      background: transparent;
-      color: var(--red);
-      border: 1px solid var(--red);
-      border-radius: 6px;
-      width: 28px;
-      height: 28px;
-      font-size: 0.85rem;
-      line-height: 1;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-
-    .btn-remove-email:hover {
-      background: var(--red);
-      color: white;
-    }
-
-    .btn-add-email {
-      background: transparent;
-      color: var(--blue);
-      border: 1px dashed var(--blue);
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      margin-top: 2px;
-      transition: background 0.15s;
-      width: 100%;
-    }
-
-    .btn-add-email:hover {
-      background: rgba(59, 130, 246, 0.12);
-    }
-
     /* ── Crachá ── */
     .cracha-wrap {
       display: flex;
@@ -968,16 +812,25 @@
       }
     }
   </style>
-</head>
+<style id="antigravity-scroll-lock-style">
+  html:root body.antigravity-scroll-lock {
+    overflow: hidden !important;
+  }
+</style><style>
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+</style></head>
 
-<body>
+<body class="">
 
   <header>
     <h1>⚙️ Sistema de Qualificação</h1>
     <div class="header-btns">
-      <button class="btn btn-secondary" id="btnConnectSerial" style="color: var(--accent); border-color: var(--accent);" onclick="connectSerial()">🔌 <span>Conectar Máquina</span></button>
       <button class="btn btn-secondary" id="btnOperacao">🔍 <span>Modo Operação</span></button>
-      <button class="btn btn-secondary" id="btnRegistro">📋 <span>Atividades</span></button>
       <button class="btn btn-primary" id="btnAdmin">🔐 <span>Administração</span></button>
     </div>
   </header>
@@ -985,15 +838,9 @@
   <!-- TELA OPERAÇÃO -->
   <div id="operacao" class="tela">
     <div class="leitura-card">
-      <h2>⚙️ Painel de Controle do Posto</h2>
-      <select id="localOperacaoAtual" onchange="verificarLocalOperacao()">
-        <option value="">-- Selecione o Posto de Trabalho --</option>
-      </select>
-
-      <div id="leituraArea" style="display:none; margin-top:16px;">
-        <p>Passe o crachá do operador para liberar a máquina. O sistema encerrará a sessão automaticamente ao fim do turno.</p>
-        <input type="text" id="leitura" placeholder="📶 Aguardando leitura do crachá...">
-      </div>
+      <h2>🔍 Leitura de Código</h2>
+      <p>Passe o código de barras ou QR Code do operador, ou digite manualmente e pressione Enter</p>
+      <input type="text" id="leitura" autofocus="" placeholder="Passe o código ou digite aqui...">
 
       <div id="resultado">
         <img id="fotoOperador" alt="Foto do operador">
@@ -1002,150 +849,27 @@
         <p id="validade"></p>
       </div>
     </div>
-
-    <!-- Painel da Esteira -->
-    <div class="esteira-painel">
-
-      <!-- Card Status -->
-      <div class="esteira-status-card estado-aguardando" id="esteiraStatusCard">
-        <div class="esteira-icone" id="esteiraIcone">⏸️</div>
-        <div class="esteira-estado-label" id="esteiraLabel">AGUARDANDO</div>
-        <div class="esteira-operador-nome" id="esteiraOpNome">—</div>
-        <div class="esteira-operador-sub" id="esteiraOpSub">Nenhum operador ativo</div>
-
-        <div class="timer-wrap" id="timerWrap" style="display:none">
-          <svg class="timer-svg" viewBox="0 0 140 140">
-            <circle class="timer-bg" cx="70" cy="70" r="58"/>
-            <circle class="timer-arco" id="timerArco" cx="70" cy="70" r="58"
-              stroke-dasharray="364.4" stroke-dashoffset="0"/>
-          </svg>
-          <div class="timer-texto">
-            <span id="timerDisplay">--:--</span>
-            <small>restante</small>
-          </div>
-        </div>
-
-        <button class="btn btn-danger" id="btnEncerrar"
-          style="display:none;margin:16px auto 0" onclick="encerrarSessao('manual')">⏹ Encerrar Sessão</button>
-      </div>
-
-      <!-- Card Info de Turno (só exibe, não configura) -->
-      <div class="card" style="text-align:left">
-        <h2 style="font-size:1rem">⏱️ Turno Ativo</h2>
-        <div style="margin-bottom:12px">
-          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">Duração configurada</div>
-          <div id="turnoInfoLabel" style="font-size:1.1rem;font-weight:600;color:var(--accent)">—</div>
-        </div>
-        <div style="margin-bottom:12px">
-          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">Início da sessão</div>
-          <div id="turnoInfoInicio" style="font-size:0.9rem;font-weight:500">—</div>
-        </div>
-        <div style="margin-bottom:12px">
-          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">Previsão de encerramento</div>
-          <div id="turnoInfoFim" style="font-size:0.9rem;font-weight:500">—</div>
-        </div>
-        <div style="padding:10px;background:var(--surface2);border-radius:8px;font-size:0.75rem;color:var(--text-muted);line-height:1.6;margin-top:8px">
-          🔒 Configuração de turnos disponível apenas na <strong>Área de Administração</strong>.
-        </div>
-      </div>
-
-      <!-- Log de atividades -->
-      <div class="log-card" style="grid-column:1/-1;background:var(--surface2);border-color:var(--border);padding:16px">
-        <div style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:8px">
-          📋 Últimas atividades visíveis em <strong style="color:var(--accent)">Atividades</strong> (botão no topo)
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- TELA REGISTRO DE ATIVIDADES -->
-  <div id="registro" class="tela">
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div>
-        <h2 style="font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
-          📊 Registro de Atividades
-        </h2>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Histórico e análise das operações da máquina. Salvo automaticamente.</p>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span id="registroContador" style="font-size:0.8rem;color:var(--text-muted)">0 registro(s)</span>
-        <button class="btn btn-export" onclick="exportarAtividades()" title="Exportar para Excel">📥 Exportar Excel</button>
-        <button class="btn btn-danger" style="padding:7px 12px;font-size:0.8rem" onclick="limparLog()" title="Limpar histórico">🗑️ Limpar</button>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-      <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--green)" id="kpiLiberacoes">0</div>
-        <div style="font-size:0.75rem;color:var(--green);margin-top:2px">✅ Liberações</div>
-      </div>
-      <div style="background:var(--red-bg);border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--red)" id="kpiBloqueios">0</div>
-        <div style="font-size:0.75rem;color:var(--red);margin-top:2px">🔴 Bloqueios</div>
-      </div>
-      <div style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:10px;padding:16px;text-align:center">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--yellow)" id="kpiEncerramentos">0</div>
-        <div style="font-size:0.75rem;color:var(--yellow);margin-top:2px">⏹ Encerramentos</div>
-      </div>
-    </div>
-
-    <!-- Grid principal: gráficos | log -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
-
-      <!-- Coluna esquerda: gráficos -->
-      <div style="display:flex;flex-direction:column;gap:16px">
-
-        <!-- Gráfico rosca -->
-        <div class="card" style="padding:20px">
-          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Distribuição de Eventos</h3>
-          <div style="position:relative;max-width:240px;margin:0 auto">
-            <canvas id="chartRosca"></canvas>
-          </div>
-          <!-- Legenda customizada -->
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;font-size:0.8rem">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span> Liberações</span>
-              <strong id="legVerde" style="color:var(--green)">0</strong>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span> Bloqueios</span>
-              <strong id="legVermelho" style="color:var(--red)">0</strong>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span> Encerramentos</span>
-              <strong id="legAmarelo" style="color:var(--yellow)">0</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gráfico barras por hora -->
-        <div class="card" style="padding:20px">
-          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Atividade por Hora</h3>
-          <canvas id="chartBarras" style="max-height:200px"></canvas>
-        </div>
-      </div>
-
-      <!-- Coluna direita: log -->
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="display:flex;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap">
-          <span><span class="log-dot verde" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Liberada</span>
-          <span><span class="log-dot vermelho" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Bloqueio</span>
-          <span><span class="log-dot amarelo" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>Encerrada</span>
-        </div>
-        <div id="logList" style="max-height:calc(100vh - 340px);overflow-y:auto;padding:6px 0">
-          <div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:32px">Nenhuma atividade registrada.</div>
-        </div>
-      </div>
-
-    </div>
   </div>
 
   <!-- TELA ADMIN -->
-  <div id="admin" class="tela">
-    <div class="admin-grid">
+  <div id="admin" class="tela" style="max-width: 1400px;">
+    
+    <div class="admin-layout">
+      <!-- SIDEBAR -->
+      <aside class="admin-sidebar">
+        <h3>Administração</h3>
+        <nav class="admin-nav">
+          <button class="nav-btn active" id="navGerenciamento" onclick="mudarAbaAdmin('gerenciamento')">👥 Gerenciamento</button>
+          <button class="nav-btn" id="navGamificacao" onclick="mudarAbaAdmin('gamificacao')">📊 Dashboard</button>
+        </nav>
+      </aside>
+
+      <!-- ÁREA PRINCIPAL -->
+      <div class="admin-main">
+        
+        <!-- ABA 1: GERENCIAMENTO (ORIGINAL) -->
+        <div id="view-gerenciamento" class="admin-view active">
+          <div class="admin-grid">
 
       <!-- Formulário Cadastro -->
       <div class="card">
@@ -1155,14 +879,8 @@
           <input type="text" id="nomeCadastro" placeholder="Ex: João da Silva">
         </div>
         <div class="form-group">
-          <label>Código do Crachá (opcional)</label>
-          <input type="text" id="codigoCadastro" placeholder="Ex: 123456 (Deixe em branco para auto)">
-        </div>
-        <div class="form-group">
-          <label>Qualificações *</label>
-          <div id="qualificacoesContainer"></div>
-          <button type="button" class="btn-add-email" onclick="adicionarQualificacaoCampo()">+ Adicionar
-            Qualificação</button>
+          <label>Data de Validade *</label>
+          <input type="date" id="validadeCadastro">
         </div>
         <div class="form-group">
           <label>Foto (opcional)</label>
@@ -1170,15 +888,9 @@
           <p class="foto-hint">JPG, PNG ou WEBP. Será redimensionada automaticamente.</p>
         </div>
         <div class="form-group">
-          <label>E-mails dos Respons&aacute;veis <span style="color:var(--text-muted);font-size:0.75rem">(notificados se
-              n&atilde;o apto &mdash; m&aacute;x. 5)</span></label>
-          <div id="emailsContainer">
-            <div class="email-row">
-              <input type="email" class="email-input" placeholder="email1@empresa.com">
-            </div>
-          </div>
-          <button type="button" class="btn-add-email" id="btnAdicionarEmail" onclick="adicionarEmailCampo()">+ Adicionar
-            outro e-mail</button>
+          <label>E-mail do Responsável <span style="color:var(--text-muted);font-size:0.75rem">(notificado se
+              não apto)</span></label>
+          <input type="email" id="emailCadastro" placeholder="responsavel@empresa.com">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="cadastrar()">Cadastrar Operador</button>
       </div>
@@ -1199,53 +911,81 @@
             <tr>
               <th>Código</th>
               <th>Operador</th>
-              <th>Status / Qualificações</th>
+              <th>Validade</th>
+              <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="listaOperadores"></tbody>
+          <tbody id="listaOperadores"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum operador encontrado.</td></tr></tbody>
         </table>
-      </div>
-
-      <!-- Gerenciar Postos de Trabalho -->
-      <div class="card">
-        <h2>⚙️ Postos de Trabalho</h2>
-        <div class="form-group" style="display:flex; gap:8px;">
-          <input type="text" id="novoPostoNome" placeholder="Ex: Empilhadeira, Setup, Linha A">
-          <button class="btn btn-primary" onclick="adicionarPosto()">Adicionar</button>
-        </div>
-        <div id="listaPostos" style="margin-top:16px;"></div>
-      </div>
-
-      <!-- ⏱ Configuração de Turnos (Admin) -->
-      <div class="card">
-        <h2>⏱️ Configuração de Turnos</h2>
-        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">
-          Defina a duração do turno. A máquina será bloqueada automaticamente quando o tempo expirar, obrigando o operador a bipar o crachá novamente.
-        </p>
-
-        <div class="turno-grid">
-          <button class="turno-btn ativo" data-min="240" onclick="selecionarTurno(this,240)">☀️ Manhã<br><small>4h (ex: 08h–12h)</small></button>
-          <button class="turno-btn" data-min="270" onclick="selecionarTurno(this,270)">🌤️ Tarde<br><small>4h30 (ex: 13h–17h30)</small></button>
-          <button class="turno-btn" data-min="480" onclick="selecionarTurno(this,480)">🌙 Turno Completo<br><small>8h corridas</small></button>
-          <button class="turno-btn" data-min="360" onclick="selecionarTurno(this,360)">🔁 Turno Noite<br><small>6h</small></button>
+          </div>
         </div>
 
-        <div class="turno-custom">
-          <span style="font-size:0.8rem;color:var(--text-muted)">Personalizado:</span>
-          <input type="number" id="turnoCustomMin" min="0" max="999" placeholder="min" style="width: 60px;">
-          <input type="number" id="turnoCustomSeg" min="0" max="59" placeholder="seg" style="width: 60px;">
-          <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.8rem" onclick="selecionarTurnoCustom()">✓ Usar</button>
+        <!-- ABA 2: GAMIFICAÇÃO (ON THE JOB) -->
+        <div id="view-gamificacao" class="admin-view">
+          
+          <!-- Menu Topo Dashboard -->
+          <div class="card" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; padding: 20px 28px;">
+            <h2 style="margin:0; border:none; padding:0;">📊 Gamificação On The Job</h2>
+            <div style="font-size: 0.95rem; color: var(--text-muted); background: var(--surface2); padding: 8px 16px; border-radius: 8px;">
+              Mês Atual: <strong id="dashMesAtual" style="color:var(--text); margin-left: 6px;">Agosto</strong>
+            </div>
+          </div>
+
+          <!-- 3 KPIs Superiores (Mock Mensal) -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
+            <div class="card" style="text-align: center; border-top: 4px solid var(--green); padding: 20px;">
+              <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Liberações Geral</h3>
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">142</div>
+            </div>
+            <div class="card" style="text-align: center; border-top: 4px solid var(--red); padding: 20px;">
+              <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Bloqueios Geral</h3>
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">18</div>
+            </div>
+            <div class="card" style="text-align: center; border-top: 4px solid var(--accent); padding: 20px;">
+              <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Encerramento Geral</h3>
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">89</div>
+            </div>
+          </div>
+
+          <!-- Linha do Meio Gráficos -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+            
+            <div class="card" style="padding: 24px;">
+              <h2 style="font-size: 1.05rem; margin-bottom: 16px; border:none; padding-bottom: 0;">Estatísticas Mensais (Estratificado)</h2>
+              <div style="height: 260px; position: relative;">
+                <canvas id="barChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card" style="padding: 24px; display:flex; flex-direction:column;">
+              <h2 style="font-size: 1.05rem; margin-bottom: 16px; border:none; padding-bottom: 0; text-align:center;">Setor Real Atual</h2>
+              <div style="flex:1; position: relative; min-height: 180px;">
+                <canvas id="pieChart"></canvas>
+              </div>
+              <div id="pieLegenda" style="margin-top: 20px; font-size: 0.85rem; text-align: center; font-weight: 500; background: var(--surface2); padding: 12px; border-radius: 8px;"></div>
+            </div>
+          </div>
+
+          <!-- Tabela de Auditoria Setor -->
+          <div class="card" style="padding: 24px;">
+            <h2 style="font-size: 1.05rem; margin-bottom: 16px; border:none; padding-bottom: 0;">Matriz de Versatilidade (Operadores)</h2>
+            <table style="margin-top: 10px;">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome do Operador</th>
+                  <th>Validade Oficial</th>
+                  <th>Status (On the Job)</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaGamificacao">
+              </tbody>
+            </table>
+          </div>
+
         </div>
 
-        <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:8px;font-size:0.85rem;display:flex;align-items:center;gap:10px">
-          <span style="color:var(--text-muted)">Duração atual:</span>
-          <strong id="turnoConfigLabel" style="color:var(--accent)">4h (Manhã)</strong>
-        </div>
-
-        <div style="margin-top:12px;font-size:0.75rem;color:var(--text-muted);line-height:1.6;padding:10px;border:1px dashed var(--border);border-radius:8px">
-          ⚠️ Se o operador <strong>não estiver apto</strong> para o posto selecionado (sem qualificação ou com qualificação vencida), a máquina ficará <strong>bloqueada</strong> mesmo que tente bipar novamente.
-        </div>
       </div>
     </div>
   </div>
@@ -1260,10 +1000,8 @@
         <input type="text" id="editarNome" placeholder="Nome do operador">
       </div>
       <div class="form-group">
-        <label>Qualificações</label>
-        <div id="editarQualificacoesContainer"></div>
-        <button type="button" class="btn-add-email" onclick="adicionarQualificacaoCampoEdicao()">+ Adicionar
-          Qualificação</button>
+        <label>Validade</label>
+        <input type="date" id="editarValidade">
       </div>
       <div class="modal-btns">
         <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
@@ -1288,7 +1026,7 @@
               <div class="cracha-nome" id="crachaNome">—</div>
               <div class="cracha-detalhe">ID: <strong id="crachaId">—</strong></div>
               <div class="cracha-detalhe">Emitido: <strong id="crachaEmitido">—</strong></div>
-              <div class="cracha-detalhe">Validão no Sistema Web</div>
+              <div class="cracha-detalhe">Validade: <strong id="crachaValidade">—</strong></div>
             </div>
           </div>
           <div class="cracha-barcode">
@@ -1329,385 +1067,9 @@
   <script>
     const senhaAdmin = "1234"; // ⚠️ Troque esta senha por algo mais seguro!
     const STORAGE_KEY = "sq_operadores_local";
-    const POSTOS_KEY = "sq_postos_local";
-    const POSTOS_INIT_KEY = "sq_postos_inicializado";
-    const LOG_KEY = "sq_log_atividades";
     let operadores = {};
-    let postos = [];
     let firebaseDisponivel = false;
     let firebaseApi = null;
-
-    // ── SISTEMA DE TURNO / ESTEIRA ───────────────────────────────
-    let turnoDuracaoSeg = 14400; // padrão: 4h (14400s)
-    let sessaoAtiva = null;      // { codigo, nome, postoNome, inicio, fimPrevisto }
-    let timerInterval = null;
-    const CIRCUNFERENCIA = 2 * Math.PI * 58; // raio do SVG
-
-    function selecionarTurno(btn, minutos) {
-      document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('ativo'));
-      btn.classList.add('ativo');
-      turnoDuracaoSeg = minutos * 60;
-      const h = Math.floor(minutos / 60), m = minutos % 60;
-      const label = h > 0 ? (m > 0 ? `${h}h${m}min` : `${h}h`) : `${m}min`;
-      const el = document.getElementById('turnoConfigLabel');
-      if (el) el.textContent = label;
-      toast(`Turno configurado: ${label}`, 'sucesso');
-    }
-
-    function selecionarTurnoCustom() {
-      const min = parseInt(document.getElementById('turnoCustomMin').value) || 0;
-      const seg = parseInt(document.getElementById('turnoCustomSeg').value) || 0;
-      if (min === 0 && seg === 0) { toast('Informe um valor válido de tempo', 'aviso'); return; }
-      
-      document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('ativo'));
-      turnoDuracaoSeg = (min * 60) + seg;
-      
-      const h = Math.floor(min / 60), m = min % 60;
-      let label = "";
-      if (h > 0) label += `${h}h`;
-      if (m > 0) label += `${m}m `;
-      if (seg > 0) label += `${seg}s`;
-      if (!label) label = `${seg}s`; // fallback
-      
-      const el = document.getElementById('turnoConfigLabel');
-      if (el) el.textContent = label.trim();
-      toast(`Turno personalizado: ${label.trim()}`, 'sucesso');
-    }
-
-    function getTurnoLabel() {
-      const el = document.getElementById('turnoConfigLabel');
-      return el ? el.textContent : `${turnoDuracaoSeg}s`;
-    }
-
-    function iniciarSessao(op, postoNome) {
-      // Se o mesmo operador bipa novamente, renova a sessão
-      if (sessaoAtiva && sessaoAtiva.codigo === op.codigo) {
-        adicionarLog('amarelo', `🔄 Sessão renovada: ${op.nome} — ${postoNome}`);
-        encerrarSessao('renovacao', false);
-      }
-
-      const agora = Date.now();
-      const fimPrevisto = agora + (turnoDuracaoSeg * 1000);
-      sessaoAtiva = { codigo: op.codigo, nome: op.nome, postoNome, inicio: agora, fimPrevisto };
-
-      atualizarPainelEsteira('ativo', op.nome, postoNome);
-      atualizarInfoTurno(agora, fimPrevisto);
-      adicionarLog('verde', `✅ MÁQUINA LIBERADA — ${op.nome} | Posto: ${postoNome} | Turno: ${getTurnoLabel()}`);
-      sendSerialCommand("LIBERAR\n");
-
-      timerInterval = setInterval(atualizarTimer, 1000);
-      atualizarTimer();
-    }
-
-    function encerrarSessao(motivo, atualizarUI = true) {
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-      const nomeOp = sessaoAtiva ? sessaoAtiva.nome : 'Operador';
-      const postoOp = sessaoAtiva ? sessaoAtiva.postoNome : '';
-      sessaoAtiva = null;
-
-      if (atualizarUI) {
-        if (motivo === 'expirado') {
-          atualizarPainelEsteira('bloqueado', null, null);
-          document.getElementById('esteiraOpSub').textContent = 'Turno encerrado — bipar crachá para reiniciar';
-          adicionarLog('vermelho', `🔴 MÁQUINA BLOQUEADA — Turno encerrado automaticamente (${nomeOp} | ${postoOp})`);
-          toast(`Turno encerrado! Máquina bloqueada. ${nomeOp} deve bipar novamente.`, 'aviso');
-        } else if (motivo === 'manual') {
-          atualizarPainelEsteira('aguardando', null, null);
-          adicionarLog('amarelo', `⏹ Sessão encerrada manualmente (${nomeOp})`);
-          toast('Sessão encerrada. Máquina aguardando nova leitura.', 'info');
-        }
-        sendSerialCommand("BLOQUEAR\n");
-        atualizarInfoTurno(null, null);
-      }
-    }
-
-    function atualizarTimer() {
-      if (!sessaoAtiva) return;
-      const restante = sessaoAtiva.fimPrevisto - Date.now();
-      if (restante <= 0) { encerrarSessao('expirado'); return; }
-
-      const totalMs = turnoDuracaoSeg * 1000;
-      const fracao = restante / totalMs;
-      const offset = CIRCUNFERENCIA * (1 - fracao);
-
-      const arco = document.getElementById('timerArco');
-      if (arco) {
-        arco.style.strokeDashoffset = offset;
-        arco.className = 'timer-arco' + (fracao < 0.1 ? ' critico' : fracao < 0.25 ? ' aviso' : '');
-      }
-
-      const display = document.getElementById('timerDisplay');
-      if (display) {
-        const seg = Math.ceil(restante / 1000);
-        const hh = Math.floor(seg / 3600);
-        const mm = Math.floor((seg % 3600) / 60);
-        const ss = seg % 60;
-        display.textContent = hh > 0
-          ? `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`
-          : `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-      }
-    }
-
-    function atualizarPainelEsteira(estado, nomeOp, postoNome) {
-      const card = document.getElementById('esteiraStatusCard');
-      const icone = document.getElementById('esteiraIcone');
-      const label = document.getElementById('esteiraLabel');
-      const opNome = document.getElementById('esteiraOpNome');
-      const opSub = document.getElementById('esteiraOpSub');
-      const timerWrap = document.getElementById('timerWrap');
-      const btnEncerrar = document.getElementById('btnEncerrar');
-      if (!card) return;
-
-      card.className = 'esteira-status-card estado-' + estado;
-      if (estado === 'ativo') {
-        icone.textContent = '✅';
-        label.textContent = 'MÁQUINA LIBERADA';
-        opNome.textContent = nomeOp || '—';
-        opSub.textContent = postoNome ? `Operador ativo — ${postoNome}` : 'Operador ativo';
-        timerWrap.style.display = 'block';
-        btnEncerrar.style.display = 'inline-flex';
-        document.getElementById('timerArco').style.strokeDashoffset = '0';
-      } else if (estado === 'bloqueado') {
-        icone.textContent = '🔴';
-        label.textContent = 'MÁQUINA BLOQUEADA';
-        opNome.textContent = nomeOp || 'Turno encerrado';
-        opSub.textContent = 'Operador deve bipar o crachá novamente';
-        timerWrap.style.display = 'none';
-        btnEncerrar.style.display = 'none';
-      } else {
-        icone.textContent = '⏸️';
-        label.textContent = 'AGUARDANDO';
-        opNome.textContent = '—';
-        opSub.textContent = 'Nenhum operador ativo';
-        timerWrap.style.display = 'none';
-        btnEncerrar.style.display = 'none';
-      }
-    }
-
-    function atualizarInfoTurno(inicio, fim) {
-      const elLabel = document.getElementById('turnoInfoLabel');
-      const elInicio = document.getElementById('turnoInfoInicio');
-      const elFim = document.getElementById('turnoInfoFim');
-      if (!elLabel) return;
-
-      if (inicio && fim) {
-        elLabel.textContent = getTurnoLabel();
-        elInicio.textContent = new Date(inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        elFim.textContent = new Date(fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      } else {
-        elLabel.textContent = '—';
-        elInicio.textContent = '—';
-        elFim.textContent = '—';
-      }
-    }
-
-    // contadores de eventos para os gráficos
-    let _logContagem = { verde: 0, vermelho: 0, amarelo: 0 };
-    let _logPorHora = {}; // { "HH": count }
-
-    function adicionarLog(cor, msg) {
-      const lista = document.getElementById('logList');
-      if (!lista) return;
-
-      const placeholder = lista.querySelector('div[style*="text-align:center"]');
-      if (placeholder) placeholder.remove();
-
-      const agora = new Date();
-      const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const item = document.createElement('div');
-      item.className = 'log-item';
-      item.dataset.cor = cor;
-      item.dataset.hora = agora.getHours();
-      item.innerHTML = `
-        <span class="log-hora">${hora}</span>
-        <span class="log-dot ${cor}"></span>
-        <span class="log-msg">${msg}</span>`;
-      lista.insertBefore(item, lista.firstChild);
-      while (lista.children.length > 200) lista.removeChild(lista.lastChild);
-
-      // Atualizar contadores
-      if (_logContagem[cor] !== undefined) _logContagem[cor]++;
-      const hKey = String(agora.getHours()).padStart(2, '0') + 'h';
-      _logPorHora[hKey] = (_logPorHora[hKey] || 0) + 1;
-
-      // Persistir no localStorage
-      _salvarLogLocal(cor, msg, hora, agora.getHours(), agora.toISOString());
-
-      atualizarGraficos();
-    }
-
-    function _salvarLogLocal(cor, msg, hora, horaNum, isoTimestamp) {
-      try {
-        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
-        entradas.unshift({ cor, msg, hora, horaNum, ts: isoTimestamp });
-        if (entradas.length > 200) entradas.splice(200);
-        localStorage.setItem(LOG_KEY, JSON.stringify(entradas));
-      } catch(e) { console.warn('Erro ao salvar log:', e); }
-    }
-
-    function carregarLogLocal() {
-      try {
-        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
-        if (!entradas.length) return;
-
-        const lista = document.getElementById('logList');
-        if (!lista) return;
-        lista.innerHTML = '';
-
-        entradas.forEach(e => {
-          const item = document.createElement('div');
-          item.className = 'log-item';
-          item.dataset.cor = e.cor;
-          item.dataset.hora = e.horaNum;
-          item.innerHTML = `
-            <span class="log-hora">${e.hora}</span>
-            <span class="log-dot ${e.cor}"></span>
-            <span class="log-msg">${e.msg}</span>`;
-          lista.appendChild(item);
-
-          // Rebuilding counters
-          if (_logContagem[e.cor] !== undefined) _logContagem[e.cor]++;
-          const hKey = String(e.horaNum).padStart(2, '0') + 'h';
-          _logPorHora[hKey] = (_logPorHora[hKey] || 0) + 1;
-        });
-
-        atualizarGraficos();
-      } catch(e) { console.warn('Erro ao carregar log:', e); }
-    }
-
-    function limparLog() {
-      if (!confirm('Limpar todo o histórico de atividades?')) return;
-      const lista = document.getElementById('logList');
-      if (lista) lista.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:16px">Nenhuma atividade registrada.</div>';
-      _logContagem = { verde: 0, vermelho: 0, amarelo: 0 };
-      _logPorHora = {};
-      try { localStorage.removeItem(LOG_KEY); } catch(e) {}
-      atualizarGraficos();
-      toast('Histórico de atividades limpo.', 'aviso');
-    }
-
-    function exportarAtividades() {
-      try {
-        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
-        if (!entradas.length) { toast('Nenhuma atividade para exportar.', 'aviso'); return; }
-
-        const tipoMap = { verde: 'Liberação', vermelho: 'Bloqueio', amarelo: 'Encerramento' };
-        const linhas = [['Data', 'Hora', 'Tipo', 'Mensagem']];
-
-        entradas.forEach(e => {
-          const d = e.ts ? new Date(e.ts) : new Date();
-          const data = d.toLocaleDateString('pt-BR');
-          const tipo = tipoMap[e.cor] || e.cor;
-          // Limpa emojis e símbolos do início da mensagem para o CSV
-          const msgLimpa = e.msg.replace(/^[\p{Emoji}\s]+/u, '').trim();
-          linhas.push([data, e.hora, tipo, msgLimpa]);
-        });
-
-        const csv = linhas.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        const dataHoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-        a.download = `atividades_${dataHoje}.csv`;
-        a.click();
-        toast('Arquivo exportado com sucesso! Abra no Excel.', 'sucesso');
-      } catch(e) { toast('Erro ao exportar atividades.', 'erro'); console.error(e); }
-    }
-
-    // ── GRÁFICOS ─────────────────────────────────────────────────
-    let _chartRosca = null;
-    let _chartBarras = null;
-
-    function inicializarGraficos() {
-      const cfgBase = {
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-        animation: { duration: 400 }
-      };
-
-      // Rosca
-      const ctxR = document.getElementById('chartRosca');
-      if (ctxR && !_chartRosca) {
-        _chartRosca = new Chart(ctxR, {
-          type: 'doughnut',
-          data: {
-            labels: ['Liberações','Bloqueios','Encerramentos'],
-            datasets: [{
-              data: [0, 0, 0],
-              backgroundColor: ['rgba(34,197,94,0.85)','rgba(239,68,68,0.85)','rgba(245,158,11,0.85)'],
-              borderColor: ['#22c55e','#ef4444','#f59e0b'],
-              borderWidth: 2,
-              hoverOffset: 8
-            }]
-          },
-          options: {
-            ...cfgBase,
-            cutout: '65%',
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: ctx => ` ${ctx.label}: ${ctx.parsed} evento${ctx.parsed !== 1 ? 's' : ''}`
-                }
-              }
-            }
-          }
-        });
-      }
-
-      // Barras por hora
-      const ctxB = document.getElementById('chartBarras');
-      if (ctxB && !_chartBarras) {
-        _chartBarras = new Chart(ctxB, {
-          type: 'bar',
-          data: { labels: [], datasets: [{
-            label: 'Eventos',
-            data: [],
-            backgroundColor: 'rgba(59,130,246,0.7)',
-            borderColor: '#3b82f6',
-            borderWidth: 1,
-            borderRadius: 6
-          }]},
-          options: {
-            ...cfgBase,
-            scales: {
-              x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-              y: { ticks: { color: '#94a3b8', stepSize: 1, precision: 0, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
-            }
-          }
-        });
-      }
-    }
-
-    function atualizarGraficos() {
-      // KPIs
-      const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-      setEl('kpiLiberacoes', _logContagem.verde);
-      setEl('kpiBloqueios', _logContagem.vermelho);
-      setEl('kpiEncerramentos', _logContagem.amarelo);
-      setEl('legVerde', _logContagem.verde);
-      setEl('legVermelho', _logContagem.vermelho);
-      setEl('legAmarelo', _logContagem.amarelo);
-
-      // Rosca
-      if (_chartRosca) {
-        _chartRosca.data.datasets[0].data = [_logContagem.verde, _logContagem.vermelho, _logContagem.amarelo];
-        _chartRosca.update();
-      }
-
-      // Barras
-      if (_chartBarras) {
-        const horas = Object.keys(_logPorHora).sort();
-        _chartBarras.data.labels = horas;
-        _chartBarras.data.datasets[0].data = horas.map(h => _logPorHora[h]);
-        _chartBarras.update();
-      }
-    }
-
-    window.selecionarTurno = selecionarTurno;
-    window.selecionarTurnoCustom = selecionarTurnoCustom;
-    window.encerrarSessao = encerrarSessao;
-    window.limparLog = limparLog;
-    window.abrirRegistro = abrirRegistro;
 
     window.firebaseConfig = {
       apiKey: "AIzaSyCQYFMqG1eGU6nZKls4dDW4Fma61vR2BpA",
@@ -1751,8 +1113,6 @@
     }
     function gerarIdLocal() { return "local_" + Date.now() + "_" + Math.floor(Math.random() * 10000); }
 
-    function gerarIdPosto() { return "posto_" + Date.now() + "_" + Math.floor(Math.random() * 1000); }
-
     function configFirebaseValida() {
       // Firebase Storage bloqueia uploads via CORS quando aberto como file://
       // Nesse caso, usar sempre o modo local (localStorage)
@@ -1784,154 +1144,7 @@
     function carregarOperadoresLocal() {
       try {
         operadores = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        // MIGRAÇÃO: Se operador antigo (tem validade string, mas não qualificacoes array)
-        let migrou = false;
-        for (let id in operadores) {
-          let op = operadores[id];
-          if (op.validade && !op.qualificacoes) {
-            op.qualificacoes = [{ postoId: "geral", postoNome: "Geral (Migrado)", validade: op.validade }];
-            delete op.validade;
-            migrou = true;
-          }
-        }
-        if (migrou) salvarOperadoresLocal();
       } catch { operadores = {}; }
-    }
-
-    // ── Postos de Trabalho ────────────────────────────────────────
-
-    function salvarPostosLocal() {
-      localStorage.setItem(POSTOS_KEY, JSON.stringify(postos));
-    }
-
-    function carregarPostosLocal() {
-      try {
-        postos = JSON.parse(localStorage.getItem(POSTOS_KEY)) || [];
-      } catch { postos = []; }
-
-      // Só insere padrões na PRIMEIRA vez (antes de qualquer inicialização)
-      const jaInicializado = localStorage.getItem(POSTOS_INIT_KEY) === "1";
-      if (!jaInicializado) {
-        // Primeira carga: preenche com postos padrão se vier vazio
-        if (postos.length === 0) {
-          postos = [
-            { id: "geral", nome: "Geral" },
-            { id: "mesa_corte", nome: "Mesa de Corte" },
-            { id: "empilhadeira", nome: "Empilhadeira" }
-          ];
-          salvarPostosLocal();
-        }
-        localStorage.setItem(POSTOS_INIT_KEY, "1");
-      }
-      // Nas cargas seguintes: usa qualquer que seja o valor salvo (mesmo vazio)
-    }
-
-    function adicionarPosto() {
-      const nomeInput = document.getElementById("novoPostoNome");
-      const nome = nomeInput.value.trim();
-      if (!nome) return;
-
-      const id = gerarIdPosto();
-      postos.push({ id, nome });
-      salvarPostosLocal();
-      nomeInput.value = "";
-
-      toast(`Posto "${nome}" adicionado!`, "sucesso");
-      atualizarInterfacePostos();
-    }
-
-    function removerPosto(id) {
-      if (!confirm("Remover este posto de trabalho?")) return;
-      postos = postos.filter(p => String(p.id) !== String(id));
-      salvarPostosLocal();
-      toast("Posto removido!", "aviso");
-      atualizarInterfacePostos();
-    }
-
-    function atualizarInterfacePostos() {
-      // 1. Lista no Admin
-      const lista = document.getElementById("listaPostos");
-      if (lista) {
-        lista.innerHTML = postos.map(p => `
-          <div class="posto-item">
-            <span>📍 ${p.nome}</span>
-            <button class="btn btn-danger" onclick="removerPosto('${p.id}')">Excluir</button>
-          </div>
-        `).join("");
-      }
-
-      // 2. Select no Modo Operação
-      const selectOperacao = document.getElementById("localOperacaoAtual");
-      if (selectOperacao) {
-        const valAtual = selectOperacao.value;
-        selectOperacao.innerHTML = '<option value="">-- Selecione o Posto de Trabalho --</option>' +
-          postos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("");
-        selectOperacao.value = valAtual; // tenta manter
-      }
-
-      // 3. Atualizar Selects nos formulários (Cadastro e Edição)
-      // Substitui as options de cada select existente, tentando preservar a escolha
-      document.querySelectorAll('.qualificacao-posto-select').forEach(sel => {
-        const val = sel.value;
-        sel.innerHTML = '<option value="">Selecione...</option>' +
-          postos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("");
-        sel.value = val;
-      });
-    }
-
-    // ── Qualificações Multiplas (Formulários) ────────────────────
-
-    function gerarOpcoesPostosHTML(selecionado = "") {
-      return '<option value="">Selecione...</option>' +
-        postos.map(p => `<option value="${p.id}" ${p.id === selecionado ? 'selected' : ''}>${p.nome}</option>`).join("");
-    }
-
-    function adicionarQualificacaoCampo(containerId = "qualificacoesContainer", postoId = "", validade = "") {
-      const container = document.getElementById(containerId);
-      const row = document.createElement("div");
-      row.className = "qualificacao-row";
-      row.innerHTML = `
-        <select class="qualificacao-posto-select">
-          ${gerarOpcoesPostosHTML(postoId)}
-        </select>
-        <input type="date" class="qualificacao-data-input" value="${validade}">
-        <button type="button" class="btn-remove-qual" onclick="this.closest('.qualificacao-row').remove()" title="Remover">✕</button>
-      `;
-      container.appendChild(row);
-    }
-
-    function adicionarQualificacaoCampoEdicao() {
-      adicionarQualificacaoCampo("editarQualificacoesContainer");
-    }
-
-    function lerQualificacoesDoDOM(containerId) {
-      const rows = document.getElementById(containerId).querySelectorAll('.qualificacao-row');
-      const quals = [];
-      rows.forEach(row => {
-        const sel = row.querySelector('.qualificacao-posto-select');
-        const dt = row.querySelector('.qualificacao-data-input');
-        if (sel.value && dt.value) {
-          const postoNome = sel.options[sel.selectedIndex].text;
-          quals.push({ postoId: sel.value, postoNome: postoNome, validade: dt.value });
-        }
-      });
-      return quals;
-    }
-
-    // ── Firebase (Migração Qualificações) ────────────────────────
-
-    // (Opcional) Adaptar o snapshot Firebase se tiver operadores legado
-    function processarSnapshotFirebase(snapshot) {
-      operadores = {};
-      snapshot.forEach(docSnap => {
-        let op = docSnap.data();
-        if (op.validade && !op.qualificacoes) {
-          op.qualificacoes = [{ postoId: "geral", postoNome: "Geral (Migrado)", validade: op.validade }];
-          delete op.validade;
-        }
-        operadores[docSnap.id] = op;
-      });
-      atualizarLista();
     }
 
     function lerArquivoComoDataURL(arquivo) {
@@ -1976,24 +1189,12 @@
     function irOperacao() {
       document.getElementById("operacao").style.display = "block";
       document.getElementById("admin").style.display = "none";
-      document.getElementById("registro").style.display = "none";
       document.getElementById("resultado").style.display = "none";
       document.getElementById("leitura").focus();
     }
 
-    function abrirRegistro() {
-      // Abre modal de senha antes de exibir o registro
-      const input = document.getElementById("inputSenhaAdmin");
-      _senhaDestino = 'registro';
-      input.value = "";
-      document.getElementById("senhaErro").style.display = "none";
-      document.getElementById("modalSenha").classList.add("show");
-      setTimeout(() => input.focus(), 100);
-    }
-
     function loginAdmin() {
       const input = document.getElementById("inputSenhaAdmin");
-      _senhaDestino = 'admin';
       input.value = "";
       document.getElementById("senhaErro").style.display = "none";
       document.getElementById("modalSenha").classList.add("show");
@@ -2004,23 +1205,13 @@
       document.getElementById("modalSenha").classList.remove("show");
     }
 
-    let _senhaDestino = 'admin'; // 'admin' ou 'registro'
-
     function confirmarSenhaAdmin() {
       const senha = document.getElementById("inputSenhaAdmin").value;
       if (senha === senhaAdmin) {
         fecharModalSenha();
-        if (_senhaDestino === 'registro') {
-          document.getElementById("operacao").style.display = "none";
-          document.getElementById("admin").style.display = "none";
-          document.getElementById("registro").style.display = "block";
-          atualizarContadorRegistro();
-        } else {
-          document.getElementById("admin").style.display = "block";
-          document.getElementById("operacao").style.display = "none";
-          document.getElementById("registro").style.display = "none";
-          atualizarLista();
-        }
+        document.getElementById("admin").style.display = "block";
+        document.getElementById("operacao").style.display = "none";
+        atualizarLista();
       } else {
         document.getElementById("senhaErro").style.display = "block";
         document.getElementById("inputSenhaAdmin").value = "";
@@ -2028,43 +1219,9 @@
       }
     }
 
-    function atualizarContadorRegistro() {
-      const lista = document.getElementById('logList');
-      const el = document.getElementById('registroContador');
-      if (!el || !lista) return;
-      const total = lista.querySelectorAll('.log-item').length;
-      el.textContent = `${total} registro${total !== 1 ? 's' : ''}`;
-      // Inicializa os gráficos na primeira abertura e atualiza os dados
-      inicializarGraficos();
-      atualizarGraficos();
-    }
-
-    function verificarLocalOperacao() {
-      const select = document.getElementById("localOperacaoAtual");
-      const area = document.getElementById("leituraArea");
-      const result = document.getElementById("resultado");
-
-      if (select.value) {
-        area.style.display = "block";
-        document.getElementById("leitura").focus();
-      } else {
-        area.style.display = "none";
-        result.style.display = "none";
-      }
-    }
-
     // ── Validação ────────────────────────────────────────────────
 
     function validar(codigo) {
-      const postoAtualId = document.getElementById("localOperacaoAtual").value;
-      if (!postoAtualId) {
-        toast("Selecione o local de operação primeiro!", "aviso");
-        return;
-      }
-
-      const pAtual = postos.find(p => p.id === postoAtualId);
-      const postoNome = pAtual ? pAtual.nome : "Desconhecido";
-
       const op = Object.values(operadores).find(o => o.codigo === codigo);
       const resultado = document.getElementById("resultado");
       resultado.style.display = "block";
@@ -2075,159 +1232,63 @@
         document.getElementById("nome").innerText = "Código não cadastrado";
         document.getElementById("fotoOperador").style.display = "none";
         document.getElementById("validade").innerText = "Verifique o código e tente novamente.";
-        adicionarLog('vermelho', `❓ Código não encontrado: ${codigo}`);
-        setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 5000);
         return;
       }
 
-      // Procurar qualificação específica para o posto selecionado
-      const qual = (op.qualificacoes || []).find(q => q.postoId === postoAtualId);
+      const dias = diasAte(op.validade);
+      const apto = dias >= 0;
 
       document.getElementById("nome").innerText = op.nome;
 
       const fotoEl = document.getElementById("fotoOperador");
-      if (op.foto) { fotoEl.src = op.foto; fotoEl.style.display = "block"; }
-      else { fotoEl.style.display = "none"; }
-
-      if (!qual) {
-        // NÃO TREINADO PARA O LOCAL
-        resultado.className = "naoapto";
-        document.getElementById("status").innerText = "❌ NÃO APTO";
-        document.getElementById("validade").innerHTML = `Sem qualificação para: <strong>${postoNome}</strong>.`;
-
-        // Bloqueia máquina
-        if (sessaoAtiva) encerrarSessao('manual', false);
-        atualizarPainelEsteira('bloqueado', op.nome, postoNome);
-        sendSerialCommand("BLOQUEAR\n");
-        document.getElementById('esteiraOpSub').textContent = `Sem qualificação para ${postoNome}`;
-        adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} sem qualificação para: ${postoNome}`);
-        toast(`❌ ${op.nome} — SEM qualificação para ${postoNome}. Máquina bloqueada!`, 'erro');
-        dispararEmailNaoApto(op, "Sem Qualificação", postoNome);
-        setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
-        return;
+      if (op.foto) {
+        fotoEl.src = op.foto;
+        fotoEl.style.display = "block";
+      } else {
+        fotoEl.style.display = "none";
       }
-
-      const dias = diasAte(qual.validade);
-      const apto = dias >= 0;
 
       const textoDias = apto
         ? (dias === 0 ? "Vence hoje!" : `Restam ${dias} dia${dias !== 1 ? "s" : ""}`)
         : `Venceu há ${Math.abs(dias)} dia${Math.abs(dias) !== 1 ? "s" : ""}`;
 
       document.getElementById("validade").innerHTML =
-        `Local: <strong>${qual.postoNome || postoNome}</strong><br>
-         Válido até: <strong>${formatarData(qual.validade)}</strong><br>${textoDias}`;
+        `Válido até: <strong>${formatarData(op.validade)}</strong><br>${textoDias}`;
 
       resultado.className = apto ? "apto" : "naoapto";
       document.getElementById("status").innerText = apto ? "✅ APTO" : "❌ NÃO APTO";
 
-      // ── Lógica da Máquina ─────────────────────────────────────────
-      if (apto) {
-        iniciarSessao(op, qual.postoNome || postoNome);
-        toast(`✅ ${op.nome} — MÁQUINA LIBERADA por ${getTurnoLabel()} (${postoNome})`, 'sucesso');
-      } else {
-        if (sessaoAtiva) encerrarSessao('manual', false);
-        atualizarPainelEsteira('bloqueado', op.nome, postoNome);
-        sendSerialCommand("BLOQUEAR\n");
-        document.getElementById('esteiraOpSub').textContent = `Qualificação vencida! (${textoDias})`;
-        adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} NÃO APTO para ${postoNome} (${textoDias})`);
-        toast(`❌ ${op.nome} — NÃO APTO para ${postoNome}. Esteira bloqueada!`, 'erro');
-        dispararEmailNaoApto(op, "Treinamento Vencido", qual.postoNome || postoNome);
+      // ── Enviar e-mail automaticamente se NÃO APTO ──
+      if (!apto && op.emailResponsavel) {
+        const params = {
+          to_email: op.emailResponsavel,
+          to_name: op.emailResponsavel,
+          op_nome: op.nome,
+          op_codigo: op.codigo,
+          op_validade: formatarData(op.validade),
+          dias_vencido: Math.abs(dias),
+          from_name: "Sistema de Qualificação"
+        };
+        emailjs.send("service_yb3a7fh", "template_zs68mzo", params, "hFrtuxVQmksRR0qK-")
+          .then(() => toast("📧 E-mail enviado ao responsável!", "sucesso"))
+          .catch(e => {
+            console.error("EmailJS erro:", e);
+            toast("⚠️ Falha ao enviar e-mail: verifique o Template ID", "aviso");
+          });
       }
-
-      setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
-    }
-
-    function dispararEmailNaoApto(op, motivo, postoNome) {
-      const emails = Array.isArray(op.emailsResponsaveis) && op.emailsResponsaveis.length
-        ? op.emailsResponsaveis
-        : (op.emailResponsavel ? [op.emailResponsavel] : []);
-
-      if (emails.length) {
-        let enviados = 0;
-        emails.forEach(email => {
-          const params = {
-            to_email: email,
-            to_name: email,
-            op_nome: op.nome,
-            op_codigo: op.codigo,
-            op_validade: motivo, // adaptando o template para exibir o motivo
-            dias_vencido: postoNome, // adaptando para exibir o posto no email
-            from_name: "Sistema de Qualificação"
-          };
-          emailjs.send("service_yb3a7fh", "template_zs68mzo", params, "hFrtuxVQmksRR0qK-")
-            .then(() => {
-              enviados++;
-              if (enviados === emails.length)
-                toast(`📧 E-mail alerta enviado!`, "sucesso");
-            })
-            .catch(e => {
-              console.error("EmailJS erro:", e);
-            });
-        });
-      }
-    }
-
-    // ── Multi-Email: adicionar / remover campos ───────────────────
-
-    const MAX_EMAILS = 5;
-
-    function atualizarBtnAdicionarEmail() {
-      const total = document.querySelectorAll(".email-input").length;
-      const btn = document.getElementById("btnAdicionarEmail");
-      if (btn) btn.style.display = total >= MAX_EMAILS ? "none" : "";
-    }
-
-    function adicionarEmailCampo() {
-      const container = document.getElementById("emailsContainer");
-      const total = container.querySelectorAll(".email-input").length;
-      if (total >= MAX_EMAILS) return;
-
-      const idx = total + 1;
-      const row = document.createElement("div");
-      row.className = "email-row";
-      row.innerHTML = `
-        <input type="email" class="email-input" placeholder="email${idx}@empresa.com">
-        <button type="button" class="btn-remove-email" onclick="removerEmailCampo(this)" title="Remover">✕</button>`;
-      container.appendChild(row);
-      atualizarBtnAdicionarEmail();
-    }
-
-    function removerEmailCampo(btn) {
-      btn.closest(".email-row").remove();
-      atualizarBtnAdicionarEmail();
     }
 
     // ── Cadastro ─────────────────────────────────────────────────
 
     async function cadastrar() {
       const nome = document.getElementById("nomeCadastro").value.trim();
-      let codigoCustom = document.getElementById("codigoCadastro").value.trim();
+      const validade = document.getElementById("validadeCadastro").value;
       const fotoArquivo = document.getElementById("fotoCadastro").files[0];
-      const emailsResponsaveis = [...document.querySelectorAll(".email-input")]
-        .map(i => i.value.trim()).filter(Boolean);
+      const emailResponsavel = document.getElementById("emailCadastro").value.trim();
 
-      const qualificacoes = lerQualificacoesDoDOM("qualificacoesContainer");
-
-      if (!nome) {
-        toast("Preencha o nome do operador", "aviso");
+      if (!nome || !validade) {
+        toast("Preencha nome e data de validade", "aviso");
         return;
-      }
-
-      if (qualificacoes.length === 0) {
-        toast("Adicione ao menos uma qualificação!", "aviso");
-        return;
-      }
-
-      // Validar código customizado único
-      if (codigoCustom) {
-        const existe = Object.values(operadores).find(o => o.codigo === codigoCustom);
-        if (existe) {
-          toast("Este código de crachá já está em uso!", "erro");
-          return;
-        }
-      } else {
-        codigoCustom = gerarCodigo();
       }
 
       // Desabilitar botão durante o processo para evitar duplo clique
@@ -2247,16 +1308,20 @@
 
         const cadastrarLocal = async () => {
           const id = gerarIdLocal();
-          operadores[id] = { codigo: codigoCustom, nome, qualificacoes, foto, emailsResponsaveis, criadoEm: new Date().toISOString() };
+          const codigo = gerarCodigo();
+          operadores[id] = { codigo, nome, validade, foto, emailResponsavel, criadoEm: new Date().toISOString() };
           salvarOperadoresLocal();
           atualizarLista();
-          toast(`Operador "${nome}" cadastrado! Código: ${codigoCustom}`, "sucesso");
+          toast(`Operador "${nome}" cadastrado! Código: ${codigo}`, "sucesso");
         };
 
         if (firebaseDisponivel && firebaseApi) {
           try {
+            const codigo = gerarCodigo();
+            // Foto já está comprimida (~30-50KB DataURL) — salva direto no Firestore
+            // Firebase Storage removido pois causa CORS ao abrir via GitHub Pages
             await firebaseApi.addDoc(firebaseApi.funcionariosRef, {
-              codigo: codigoCustom, nome, qualificacoes, emailsResponsaveis, foto: foto || null, criadoEm: new Date()
+              codigo, nome, validade, emailResponsavel, foto: foto || null, criadoEm: new Date()
             });
           } catch (erro) {
             console.error("Firebase falhou, salvando local:", erro);
@@ -2267,16 +1332,9 @@
         }
 
         document.getElementById("nomeCadastro").value = "";
-        document.getElementById("codigoCadastro").value = "";
+        document.getElementById("validadeCadastro").value = "";
         document.getElementById("fotoCadastro").value = "";
-        document.getElementById("qualificacoesContainer").innerHTML = "";
-        adicionarQualificacaoCampo(); // campo vazio default
-
-        // Resetar campos de email para 1 campo vazio
-        document.getElementById("emailsContainer").innerHTML =
-          '<div class="email-row"><input type="email" class="email-input" placeholder="email1@empresa.com"></div>';
-        document.getElementById("btnAdicionarEmail").style.display = "";
-        atualizarBtnAdicionarEmail();
+        document.getElementById("emailCadastro").value = "";
 
       } catch (erroGeral) {
         console.error("Erro ao cadastrar operador:", erroGeral);
@@ -2304,26 +1362,12 @@
       }
 
       for (const [id, op] of filtrados) {
-        let qualsHTML = "";
-        let badgeGlobalClass = "badge-ok";
-        let badgeGlobalLabel = "Válido";
-        let minDias = Infinity;
-
-        const quals = op.qualificacoes || [];
-        if (quals.length === 0) {
-          badgeGlobalClass = "badge-vencido"; badgeGlobalLabel = "Sem Qualificação";
-        } else {
-          quals.forEach(q => {
-            const dias = diasAte(q.validade);
-            if (dias < minDias) minDias = dias;
-            const isApto = dias >= 0;
-            const qBadge = isApto ? "badge-ok" : "badge-vencido";
-            qualsHTML += `<div style="margin-bottom:4px"><span class="badge ${qBadge}" style="font-size:0.65rem">${formatarData(q.validade)}</span> <span style="font-size:0.75rem">${q.postoNome}</span></div>`;
-          });
-
-          if (minDias < 0) { badgeGlobalClass = "badge-vencido"; badgeGlobalLabel = "Possui Vencimentos"; }
-          else if (minDias <= 30) { badgeGlobalClass = "badge-aviso"; badgeGlobalLabel = "Vence em Breve"; }
-        }
+        const dias = diasAte(op.validade);
+        const apto = dias >= 0;
+        let badgeClass, badgeLabel;
+        if (!apto) { badgeClass = "badge-vencido"; badgeLabel = "Vencido"; }
+        else if (dias <= 30) { badgeClass = "badge-aviso"; badgeLabel = `${dias}d restantes`; }
+        else { badgeClass = "badge-ok"; badgeLabel = "Válido"; }
 
         const fotoHtml = op.foto
           ? `<img src="${op.foto}" class="operador-foto" alt="">`
@@ -2333,13 +1377,8 @@
       <tr>
         <td><code style="font-size:0.75rem;color:var(--text-muted)">${op.codigo}</code></td>
         <td><div style="display:flex;align-items:center;gap:4px">${fotoHtml}<span>${op.nome}</span></div></td>
-        <td>
-           <span class="badge ${badgeGlobalClass}" style="margin-bottom:6px">${badgeGlobalLabel}</span>
-           <details>
-             <summary style="font-size:0.75rem; cursor:pointer;">Ver detalhes (${quals.length})</summary>
-             <div style="margin-top:6px">${qualsHTML}</div>
-           </details>
-        </td>
+        <td>${formatarData(op.validade)}</td>
+        <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
         <td style="vertical-align: top;">
           <div class="acoes">
             <button class="btn btn-testar" onclick="testarOperador('${op.codigo}')">&#9654; Testar</button>
@@ -2373,16 +1412,11 @@
     // ── Exportar CSV ─────────────────────────────────────────────
 
     function exportarCSV() {
-      const linhas = [["Código", "Nome", "Status", "Qualificacoes (Local: Data)"]];
+      const linhas = [["Código", "Nome", "Validade", "Status"]];
       for (const op of Object.values(operadores)) {
-        const quals = op.qualificacoes || [];
-        const qualsTxt = quals.map(q => `${q.postoNome}: ${formatarData(q.validade)}`).join(" | ");
-
-        let status = "Válido";
-        if (quals.length === 0) status = "Sem qualificação";
-        else if (quals.some(q => diasAte(q.validade) < 0)) status = "Possui Vencimentos";
-
-        linhas.push([op.codigo, op.nome, status, qualsTxt]);
+        const dias = diasAte(op.validade);
+        const status = dias < 0 ? "Vencido" : dias <= 30 ? "Próximo venc." : "Válido";
+        linhas.push([op.codigo, op.nome, formatarData(op.validade), status]);
       }
       const csv = linhas.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
       const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
@@ -2399,14 +1433,7 @@
       const op = operadores[id];
       document.getElementById("editarId").value = id;
       document.getElementById("editarNome").value = op.nome;
-
-      const cont = document.getElementById("editarQualificacoesContainer");
-      cont.innerHTML = "";
-      (op.qualificacoes || []).forEach(q => {
-        adicionarQualificacaoCampo("editarQualificacoesContainer", q.postoId, q.validade);
-      });
-      if ((op.qualificacoes || []).length === 0) adicionarQualificacaoCampoEdicao();
-
+      document.getElementById("editarValidade").value = op.validade;
       document.getElementById("modalEditar").classList.add("show");
     }
 
@@ -2417,16 +1444,15 @@
     async function salvarEdicao() {
       const id = document.getElementById("editarId").value;
       const novoNome = document.getElementById("editarNome").value.trim();
-      const novasQuals = lerQualificacoesDoDOM("editarQualificacoesContainer");
+      const novaValidade = document.getElementById("editarValidade").value;
 
-      if (!novoNome) { toast("Preencha o nome", "aviso"); return; }
-      if (novasQuals.length === 0) { toast("Adicione ao menos uma qualificação", "aviso"); return; }
+      if (!novoNome || !novaValidade) { toast("Preencha todos os campos", "aviso"); return; }
 
       if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
-        await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), { nome: novoNome, qualificacoes: novasQuals });
+        await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), { nome: novoNome, validade: novaValidade });
       } else {
         operadores[id].nome = novoNome;
-        operadores[id].qualificacoes = novasQuals;
+        operadores[id].validade = novaValidade;
         salvarOperadoresLocal();
         atualizarLista();
       }
@@ -2453,26 +1479,19 @@
     // ── Testar ao Vivo ────────────────────────────────────────────
 
     function testarOperador(codigo) {
+      // Vai para Modo Operação e simula a leitura do código
       document.getElementById("admin").style.display = "none";
-      irOperacao();
-
-      const select = document.getElementById("localOperacaoAtual");
-      if (select.options.length > 1 && !select.value) {
-        select.selectedIndex = 1; // Força selecionar o primeiro posto válido para o teste
-        verificarLocalOperacao();
-      }
-
+      document.getElementById("operacao").style.display = "block";
+      const inp = document.getElementById("leitura");
+      inp.value = codigo;
+      // Pequena animação para mostrar que o código foi digitado
+      inp.style.borderColor = "var(--accent)";
       setTimeout(() => {
-        const inp = document.getElementById("leitura");
-        inp.value = codigo;
-        inp.style.borderColor = "var(--accent)";
-        setTimeout(() => {
-          validar(codigo);
-          inp.value = "";
-          inp.style.borderColor = "";
-          toast("Simulação de leitura realizada!", "sucesso");
-        }, 400);
-      }, 200);
+        validar(codigo);
+        inp.value = "";
+        inp.style.borderColor = "";
+        toast("Simulação de leitura realizada!", "sucesso");
+      }, 600);
     }
 
     // ── Crachá ────────────────────────────────────────────────────
@@ -2484,22 +1503,10 @@
       // Preencher dados no crachá
       document.getElementById("crachaNome").innerText = op.nome;
       document.getElementById("crachaId").innerText = op.codigo;
-      // criadoEm pode ser string ISO ou Timestamp do Firestore {seconds, nanoseconds}
-      let crachaEmitidoStr = "";
-      if (op.criadoEm) {
-        if (typeof op.criadoEm === "string") {
-          crachaEmitidoStr = op.criadoEm.split("T")[0];
-        } else if (op.criadoEm.seconds != null) {
-          crachaEmitidoStr = new Date(op.criadoEm.seconds * 1000).toISOString().split("T")[0];
-        } else if (op.criadoEm.toDate) {
-          crachaEmitidoStr = op.criadoEm.toDate().toISOString().split("T")[0];
-        } else {
-          crachaEmitidoStr = new Date().toISOString().split("T")[0];
-        }
-      } else {
-        crachaEmitidoStr = new Date().toISOString().split("T")[0];
-      }
-      document.getElementById("crachaEmitido").innerText = formatarData(crachaEmitidoStr);
+      document.getElementById("crachaValidade").innerText = formatarData(op.validade);
+      document.getElementById("crachaEmitido").innerText = op.criadoEm
+        ? formatarData(op.criadoEm.split("T")[0])
+        : formatarData(new Date().toISOString().split("T")[0]);
 
       // Foto
       const fotoBox = document.getElementById("crachaFotoBox");
@@ -2528,6 +1535,7 @@
     function imprimirCracha() {
       const op_nome = document.getElementById("crachaNome").innerText;
       const op_id = document.getElementById("crachaId").innerText;
+      const op_validade = document.getElementById("crachaValidade").innerText;
       const op_emitido = document.getElementById("crachaEmitido").innerText;
       const op_foto = document.getElementById("crachaFotoBox").querySelector("img")?.src || "";
       const barcodeEl = document.getElementById("crachaBarcode");
@@ -2648,6 +1656,7 @@
       <div class="nome">${op_nome}</div>
       <div class="detalhe">ID: <strong>${op_id}</strong></div>
       <div class="detalhe">Emitido: <strong>${op_emitido}</strong></div>
+      <div class="detalhe">Validade: <strong>${op_validade}</strong></div>
       <div class="faixa"></div>
     </div>
   </div>
@@ -2685,8 +1694,121 @@
       iframe.contentDocument.close();
     }
 
-    // ── Expo global ───────────────────────────────────────────────
+    // ── Gamificação On The Job ───────────────────────────────────
 
+    const mesesNome = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+    function mudarAbaAdmin(aba) {
+      document.getElementById('navGerenciamento').classList.remove('active');
+      document.getElementById('navGamificacao').classList.remove('active');
+      document.getElementById('view-gerenciamento').classList.remove('active');
+      document.getElementById('view-gamificacao').classList.remove('active');
+      
+      const capAba = aba.charAt(0).toUpperCase() + aba.slice(1);
+      document.getElementById('nav' + capAba).classList.add('active');
+      document.getElementById('view-' + aba).classList.add('active');
+
+      if (aba === 'gamificacao') {
+        renderizarDashboard();
+      }
+    }
+
+    let dashCharts = {};
+    function renderizarDashboard() {
+      document.getElementById('dashMesAtual').innerText = mesesNome[new Date().getMonth()];
+
+      let treinados = 0;
+      let aVencer = 0;
+      let vencidos = 0;
+
+      const ops = Object.values(operadores);
+      const tbody = document.getElementById('tabelaGamificacao');
+      tbody.innerHTML = '';
+
+      ops.forEach(op => {
+        const dias = diasAte(op.validade);
+        
+        let statusGami = "";
+        let color = "";
+        if (!op.validade || dias < 0) { 
+           vencidos++; statusGami = "Vencido"; color = "var(--red)"; 
+        }
+        else if (dias <= 30) { 
+           aVencer++; statusGami = "A Vencer"; color = "var(--yellow)"; 
+        }
+        else { 
+           treinados++; statusGami = "Treinado"; color = "var(--green)"; 
+        }
+
+        tbody.innerHTML += `<tr>
+          <td><code style="font-size:0.75rem;color:var(--text-muted)">${op.codigo}</code></td>
+          <td style="font-weight: 500;">${op.nome}</td>
+          <td>${formatarData(op.validade)}</td>
+          <td><strong style="color:${color}; background:rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px;">${statusGami}</strong></td>
+        </tr>`;
+      });
+
+      if(ops.length === 0) {
+         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhum operador cadastrado no setor.</td></tr>';
+      }
+
+      document.getElementById('pieLegenda').innerHTML = `
+        <span style="color:var(--green)">Treinados: ${treinados}</span> &nbsp;|&nbsp; 
+        <span style="color:var(--yellow)">A Vencer: ${aVencer}</span> <br/>
+        <span style="color:var(--red); display:inline-block; margin-top:6px;">Vencidos: ${vencidos}</span>
+      `;
+
+      if (dashCharts.pie) dashCharts.pie.destroy();
+      const ctxPie = document.getElementById('pieChart').getContext('2d');
+      dashCharts.pie = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Treinados', 'A Vencer', 'Vencidos'],
+          datasets: [{
+            data: [treinados, aVencer, vencidos],
+            backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#f1f5f9', padding: 20, font: {family: 'Inter'} } }
+          }
+        }
+      });
+
+      // Bar Chart Mockado
+      if (dashCharts.bar) dashCharts.bar.destroy();
+      const ctxBar = document.getElementById('barChart').getContext('2d');
+      dashCharts.bar = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['PR01', 'PR02', 'PR03', 'PR04'],
+          datasets: [
+            { label: 'Liberações', data: [70, 50, 80, 40], backgroundColor: '#3b82f6', borderRadius: 4 },
+            { label: 'Bloqueios', data: [20, 10, 15, 5], backgroundColor: '#ef4444', borderRadius: 4 },
+            { label: 'Encerramentos', data: [10, 5, 20, 8], backgroundColor: '#64748b', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+          },
+          plugins: { legend: { position: 'top', labels: { color: '#f1f5f9', font: {family: 'Inter'} } } }
+        }
+      });
+    }
+
+    // ── Expo global ───────────────────────────────────────────────
+    
+    window.mudarAbaAdmin = mudarAbaAdmin;
     window.cadastrar = cadastrar;
     window.editar = abrirModal;
     window.excluirOperador = excluirOperador;
@@ -2699,7 +1821,6 @@
     window.fecharModalCracha = fecharModalCracha;
     window.imprimirCracha = imprimirCracha;
     window.configFirebaseValida = configFirebaseValida;
-    window.exportarAtividades = exportarAtividades;
     window.setFirebaseApi = function (api) {
       firebaseApi = api;
       firebaseDisponivel = configFirebaseValida();
@@ -2714,18 +1835,11 @@
     // ── Init ──────────────────────────────────────────────────────
 
     window.addEventListener("DOMContentLoaded", () => {
-      carregarPostosLocal();
       carregarOperadoresLocal();
-      carregarLogLocal();
       atualizarLista();
-      atualizarInterfacePostos();
-
-      // Adiciona o primeiro campo de qualificação no cadastro pra não vir vazio
-      adicionarQualificacaoCampo();
 
       document.getElementById("btnOperacao").addEventListener("click", irOperacao);
       document.getElementById("btnAdmin").addEventListener("click", loginAdmin);
-      document.getElementById("btnRegistro").addEventListener("click", abrirRegistro);
       document.getElementById("pesquisaOperador").addEventListener("input", atualizarLista);
       document.getElementById("modalEditar").addEventListener("click", e => { if (e.target === e.currentTarget) fecharModal(); });
 
@@ -2757,68 +1871,6 @@
     }
   </script>
 
-  <script>
-    // ── Web Serial API ──────────────────────────────────────────────
-    let port;
-    let writer;
 
-    async function connectSerial() {
-      if (!("serial" in navigator)) {
-        toast("❌ Seu navegador não suporta comunicação Web Serial. Use Chrome, Edge ou Opera.", "erro");
-        return;
-      }
-      try {
-        port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 9600 });
-        const textEncoder = new TextEncoderStream();
-        const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
-        writer = textEncoder.writable.getWriter();
-        toast("✅ Máquina Conectada (Arduino)!", "sucesso");
-        document.getElementById("btnConnectSerial").innerHTML = "🔌 <span>Máquina Conectada</span>";
-        document.getElementById("btnConnectSerial").style.background = "var(--green-bg)";
-        document.getElementById("btnConnectSerial").style.borderColor = "var(--green)";
-        document.getElementById("btnConnectSerial").style.color = "var(--green)";
-        
-        // Mantém a leitura da porta serial (mesmo ignorando os dados por enquanto) para evitar que o fluxo feche prematuramente
-        readSerial(port);
-      } catch (err) {
-        console.error("Erro ao conectar à serial:", err);
-        toast("❌ Erro ao conectar na máquina.", "erro");
-      }
-    }
 
-    async function sendSerialCommand(cmd) {
-      if (port && writer) {
-        try {
-          await writer.write(cmd);
-          console.log("Enviado para Arduino:", cmd);
-        } catch (err) {
-          console.error("Erro ao enviar comando Serial:", err);
-          toast("Erro na conexão com a máquina.", "erro");
-        }
-      } else {
-        console.warn("Máquina não conectada. Comando ignorado:", cmd);
-      }
-    }
-
-    async function readSerial(port) {
-      try {
-        const textDecoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-        const reader = textDecoder.readable.getReader();
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          // Opcional: Processar o Heartbeat ou mensagens "OK:LIBERADO" retornadas pelo Arduino
-          console.log("Arduino:", value);
-        }
-      } catch (error) {
-        console.error("Erro na leitura Serial:", error);
-      }
-    }
-  </script>
-
-</body>
-
-</html>
+<div id="preact-border-shadow-host" popover="manual" style="border: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div></body></html>
