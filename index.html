@@ -1512,6 +1512,10 @@
           adicionarLog('vermelho', `🔴 MÁQUINA BLOQUEADA — Turno encerrado automaticamente (${nomeOp} | ${postoOp})`);
           toast(`Turno encerrado! Máquina bloqueada. ${nomeOp} deve bipar novamente.`, 'aviso');
         } else if (motivo === 'manual') {
+          if (sessaoAtiva && sessaoAtiva.codigo) {
+             let opEnd = Object.values(operadores).find(o => o.codigo === sessaoAtiva.codigo);
+             if (opEnd) { opEnd.pontos = (opEnd.pontos || 0) + 2; salvarOperadoresLocal(true); }
+          }
           atualizarPainelEsteira('aguardando', null, null);
           adicionarLog('amarelo', `⏹ Sessão encerrada manualmente (${nomeOp})`);
           toast('Sessão encerrada. Máquina aguardando nova leitura.', 'info');
@@ -2196,6 +2200,7 @@
         document.getElementById("validade").innerHTML = `Sem qualificação para: <strong>${postoNome}</strong>.`;
 
         // Bloqueia máquina
+        op.pontos = (op.pontos || 0) - 5; salvarOperadoresLocal(true);
         if (sessaoAtiva) encerrarSessao('manual', false);
         atualizarPainelEsteira('bloqueado', op.nome, postoNome);
         sendSerialCommand("BLOQUEAR\n");
@@ -2223,9 +2228,11 @@
 
       // ── Lógica da Máquina ─────────────────────────────────────────
       if (apto) {
+        op.pontos = (op.pontos || 0) + 10; salvarOperadoresLocal(true);
         iniciarSessao(op, qual.postoNome || postoNome);
         toast(`✅ ${op.nome} — MÁQUINA LIBERADA por ${getTurnoLabel()} (${postoNome})`, 'sucesso');
       } else {
+        op.pontos = (op.pontos || 0) - 5; salvarOperadoresLocal(true);
         if (sessaoAtiva) encerrarSessao('manual', false);
         atualizarPainelEsteira('bloqueado', op.nome, postoNome);
         sendSerialCommand("BLOQUEAR\n");
