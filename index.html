@@ -1300,15 +1300,15 @@
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
           <div class="card" style="text-align: center; border-top: 4px solid var(--green); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Liberações Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">142</div>
+            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
           <div class="card" style="text-align: center; border-top: 4px solid var(--red); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Bloqueios Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">18</div>
+            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
           <div class="card" style="text-align: center; border-top: 4px solid var(--accent); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Encerramento Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">89</div>
+            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
         </div>
 
@@ -2810,62 +2810,7 @@
     let dashCharts = {};
     const mesesNome = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-    function renderizarDashboard() {
-      const dataAtual = new Date();
-      document.getElementById('dashMesAtual').innerText = mesesNome[dataAtual.getMonth()];
-
-      let treinados = 0;
-      let aVencer = 0;
-      let vencidos = 0;
-
-      const ops = Object.values(operadores);
-      const tbody = document.getElementById('tabelaGamificacao');
-      tbody.innerHTML = '';
-
-      ops.forEach(op => {
-        let piorStatus = "Treinado";
-        let menorDias = Infinity;
-        let color = "var(--green)";
-
-        // Encontrar a pior qualificacao do operador
-        if (op.qualificacoes && op.qualificacoes.length > 0) {
-            op.qualificacoes.forEach(q => {
-                const dias = diasAte(q.validade);
-                if (dias < menorDias) menorDias = dias;
-            });
-        } else {
-            menorDias = -1;
-        }
-
-        if (menorDias < 0) { 
-           vencidos++; piorStatus = "Vencido"; color = "#ef4444"; 
-        }
-        else if (menorDias <= 30) { 
-           aVencer++; piorStatus = "A Vencer"; color = "#f59e0b"; 
-        }
-        else { 
-           treinados++; piorStatus = "Treinado"; color = "#22c55e"; 
-        }
-
-        tbody.innerHTML += "<tr>" +
-          "<td><code style='font-size:0.75rem;color:var(--text-muted)'>" + op.codigo + "</code></td>" +
-          "<td style='font-weight: 500;'>" + op.nome + "</td>" +
-          "<td><strong style='color:" + color + "; background:rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px;'>" + piorStatus + "</strong></td>" +
-        "</tr>";
-      });
-
-      if(ops.length === 0) {
-         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhum operador cadastrado.</td></tr>';
-      }
-
-      document.getElementById('pieLegenda').innerHTML = 
-        "<span style='color:var(--green)'>Treinados: " + treinados + "</span> &nbsp;|&nbsp; " +
-        "<span style='color:var(--yellow)'>A Vencer: " + aVencer + "</span> <br/>" +
-        "<span style='color:var(--red); display:inline-block; margin-top:6px;'>Vencidos: " + vencidos + "</span>";
-
-      if (dashCharts.pie) dashCharts.pie.destroy();
-      const ctxPie = document.getElementById('pieChart').getContext('2d');
-      dashCharts.pie = new Chart(ctxPie, {
+    function renderizarDashboard() {\n      const dataAtual = new Date();\n      document.getElementById('dashMesAtual').innerText = mesesNome[dataAtual.getMonth()];\n\n      if(document.getElementById('dashLiberacoes')) document.getElementById('dashLiberacoes').innerText = _logContagem.verde || 0;\n      if(document.getElementById('dashBloqueios')) document.getElementById('dashBloqueios').innerText = _logContagem.vermelho || 0;\n      if(document.getElementById('dashEncerramentos')) document.getElementById('dashEncerramentos').innerText = _logContagem.amarelo || 0;\n\n      let treinados = 0; let aVencer = 0; let vencidos = 0;\n      const ops = Object.values(operadores);\n      const tbody = document.getElementById('tabelaGamificacao');\n      if(tbody) tbody.innerHTML = '';\n\n      ops.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));\n\n      ops.forEach((op, index) => {\n        let piorStatus = 'Treinado'; let menorDias = Infinity; let color = 'var(--green)';\n        if (op.qualificacoes && op.qualificacoes.length > 0) {\n            op.qualificacoes.forEach(q => {\n                const dias = diasAte(q.validade);\n                if (dias < menorDias) menorDias = dias;\n            });\n        } else { menorDias = -1; }\n\n        if (menorDias < 0) { vencidos++; piorStatus = 'Vencido'; color = '#ef4444'; }\n        else if (menorDias <= 30) { aVencer++; piorStatus = 'A Vencer'; color = '#f59e0b'; }\n        else { treinados++; piorStatus = 'Treinado'; color = '#22c55e'; }\n\n        let rankBadge = '#' + (index + 1);\n        if ((op.pontos||0) >= 0) {\n            if (index === 0) rankBadge = '&#129351; 1º';\n            else if (index === 1) rankBadge = '&#129352; 2º';\n            else if (index === 2) rankBadge = '&#129353; 3º';\n        }\n\n        if(tbody) tbody.innerHTML += '<tr>' +\n          '<td><code style="font-size:0.75rem;color:var(--text-muted)">' + op.codigo + '</code></td>' +\n          '<td style="font-weight: 500;">' + rankBadge + ' - ' + op.nome + '</td>' +\n          '<td><strong style="color:' + color + '; background:rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px;">' + piorStatus + '</strong></td>' +\n          '<td style="font-weight: 700; color: var(--accent);">' + (op.pontos || 0) + ' pts</td>' +\n        '</tr>';\n      });\n\n      if(ops.length === 0 && tbody) {\n         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhum operador cadastrado.</td></tr>';\n      }\n\n      if(document.getElementById('pieLegenda')) {\n          document.getElementById('pieLegenda').innerHTML = \n            '<span style="color:var(--green)">Treinados: ' + treinados + '</span> &nbsp;|&nbsp; ' +\n            '<span style="color:var(--yellow)">A Vencer: ' + aVencer + '</span> <br/>' +\n            '<span style="color:var(--red); display:inline-block; margin-top:6px;">Vencidos: ' + vencidos + '</span>';\n      }\n\n      const pieId = document.getElementById('pieChart');\n      if (dashCharts.pie) dashCharts.pie.destroy();\n      if(pieId) {\n          const ctxPie = pieId.getContext('2d');\n          dashCharts.pie = new Chart(ctxPie, {
         type: 'doughnut',
         data: {
           labels: ['Treinados', 'A Vencer', 'Vencidos'],
