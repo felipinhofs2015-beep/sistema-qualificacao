@@ -1167,6 +1167,7 @@
         <button class="nav-btn active" id="navOperadores" onclick="mudarAbaAdmin('operadores')">👥 Operadores</button>
         <button class="nav-btn" id="navConfiguracao" onclick="mudarAbaAdmin('configuracao')">⚙️ Configuração da Linha</button>
         <button class="nav-btn" id="navGamificacao" onclick="mudarAbaAdmin('gamificacao')">📊 Dashboard</button>
+        <button class="nav-btn" id="navPerguntas" onclick="mudarAbaAdmin('perguntas')">🎮 Banco de Perguntas</button>
       </nav>
     </aside>
 
@@ -1348,6 +1349,50 @@
 
       </div>
 
+      <!-- ABA 4: BANCO DE PERGUNTAS -->
+      <div id="view-perguntas" class="admin-view">
+        <div class="admin-grid">
+          <div class="card">
+            <h2>🎮 Criar Pergunta On-The-Job</h2>
+            <div class="form-group">
+              <label>Posto de Trabalho Alvo *</label>
+              <select id="selectPostoPergunta">
+                <option value="Geral">🌍 Todos os Postos (Geral)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Texto da Pergunta *</label>
+              <input type="text" id="novaPerguntaTexto" placeholder="Ex: O botão de emergência serve para bloquear a máquina?">
+            </div>
+            <div class="form-group">
+              <label>Resposta Correta *</label>
+              <div style="display: flex; gap: 16px; margin-top: 8px;">
+                <label><input type="radio" name="novaPerguntaResp" value="Sim" checked> Sim</label>
+                <label><input type="radio" name="novaPerguntaResp" value="Não"> Não</label>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 16px;" onclick="adicionarPergunta()">Adicionar Pergunta</button>
+          </div>
+          <div class="card" style="grid-column: span 1;">
+            <h2>📋 Perguntas Cadastradas</h2>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Posto</th>
+                    <th>Pergunta</th>
+                    <th>Resposta Correta</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaPerguntas">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1429,6 +1474,23 @@
   <!-- Toast -->
   <div id="toast"></div>
 
+  <!-- Modal Quiz On-The-Job -->
+  <div class="modal-overlay" id="modalQuiz">
+    <div class="modal" style="max-width:550px">
+      <h3>🎮 Prova de Conhecimento (On The Job)</h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Sua certificação direta está exigindo revisão! Responda corretamente às questões abaixo para garantir a liberação emergencial da máquina.</p>
+      
+      <div id="quizContainer">
+        <!-- JS fills this -->
+      </div>
+
+      <div class="modal-btns" style="margin-top: 24px;">
+        <button class="btn btn-primary" style="width:100%; padding:14px; font-size:1.1rem" onclick="finalizarQuiz()">Finalizar Respostas!</button>
+      </div>
+    </div>
+  </div>
+
+
   <script>
     const senhaAdmin = "1234"; // ⚠️ Troque esta senha por algo mais seguro!
     const STORAGE_KEY = "sq_operadores_local";
@@ -1437,6 +1499,128 @@
     const LOG_KEY = "sq_log_atividades";
     let operadores = {};
     let postos = [];
+
+    const QUESTOES_KEY = "sq_questoes_local";
+    let questoes = [];
+    let _quizAtivo = { op: null, postoNome: null, qual: null };
+
+    // CARREGAR QUESTOES NO INICIO
+    function inicializarQuestoes() {
+      try { const d = localStorage.getItem(QUESTOES_KEY); if (d) questoes = JSON.parse(d); } catch (e) {}
+    }
+
+    function salvarQuestoes() {
+      localStorage.setItem(QUESTOES_KEY, JSON.stringify(questoes));
+      renderizarPerguntas();
+    }
+
+    function renderizarPerguntas() {
+      const s = document.getElementById('selectPostoPergunta');
+      if (s) {
+        let h = '<option value="Geral">🌍 Todos os Postos (Geral)</option>';
+        postos.forEach(p => { h += `<option value="${p.nome}">${p.nome}</option>`; });
+        s.innerHTML = h;
+      }
+      
+      const tb = document.getElementById('tabelaPerguntas');
+      if (tb) {
+        tb.innerHTML = '';
+        questoes.forEach(q => {
+          tb.innerHTML += `<tr>
+            <td><code style="font-size:0.75rem">${q.posto}</code></td>
+            <td style="font-size:0.85rem">${q.texto}</td>
+            <td style="font-weight:bold; color: ${q.resposta === 'Sim' ? 'var(--green)' : 'var(--red)'}">${q.resposta}</td>
+            <td><button class="btn btn-secondary" style="color:var(--red); padding:4px 8px;" onclick="excluirPergunta('${q.id}')">Excluir</button></td>
+          </tr>`;
+        });
+        if(questoes.length === 0) tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Nenhuma pergunta cadastrada.</td></tr>';
+      }
+    }
+
+    function adicionarPergunta() {
+      const p = document.getElementById('selectPostoPergunta').value;
+      const t = document.getElementById('novaPerguntaTexto').value.trim();
+      const rb = document.querySelector('input[name="novaPerguntaResp"]:checked');
+      if (!t || !rb) return toast('Digite a pergunta', 'aviso');
+      questoes.push({ id: Date.now().toString(), posto: p, texto: t, resposta: rb.value });
+      document.getElementById('novaPerguntaTexto').value = '';
+      salvarQuestoes();
+      toast('Pergunta salva!', 'sucesso');
+    }
+
+    function excluirPergunta(id) {
+      if(!confirm('Excluir pergunta?')) return;
+      questoes = questoes.filter(q => q.id !== id);
+      salvarQuestoes();
+    }
+
+    function dispararEmailGame(op, status, postoNome) {
+      const emails = Array.isArray(op.emailsResponsaveis) && op.emailsResponsaveis.length
+        ? op.emailsResponsaveis : (op.emailResponsavel ? [op.emailResponsavel] : []);
+      if (!emails.length) return;
+      
+      emails.forEach(email => {
+        const params = {
+          to_email: email, to_name: email, op_nome: op.nome, op_codigo: op.codigo,
+          op_validade: status, dias_vencido: postoNome, from_name: "Gamificação On-The-Job"
+        };
+        emailjs.send("service_yb3a7fh", "template_zs68mzo", params, "hFrtuxVQmksRR0qK-").catch(e => console.error(e));
+      });
+      if(status.includes("Reprovou")) toast("E-mail de Alerta de Reciclagem enviado!","erro");
+      else toast("E-mail de Aprovação enviado!", "sucesso");
+    }
+
+    function iniciarQuiz(op, postoNome, qs, qual) {
+      _quizAtivo = { op, postoNome, qual, questoesSelecionadas: qs };
+      const cont = document.getElementById('quizContainer');
+      let h = '';
+      qs.forEach((q, i) => {
+        h += `<div class="card" style="margin-bottom:12px; padding:16px;">
+          <div style="font-size:0.95rem; margin-bottom:10px; font-weight:500;">${i+1}. ${q.texto}</div>
+          <div style="display:flex; gap:12px;">
+            <label style="cursor:pointer;"><input type="radio" name="q_${q.id}" value="Sim"> Sim</label>
+            <label style="cursor:pointer;"><input type="radio" name="q_${q.id}" value="Não"> Não</label>
+          </div>
+        </div>`;
+      });
+      cont.innerHTML = h;
+      document.getElementById('modalQuiz').classList.add('show');
+    }
+
+    function finalizarQuiz() {
+      const op = _quizAtivo.op; const postoNome = _quizAtivo.postoNome;
+      let acertos = 0; let total = _quizAtivo.questoesSelecionadas.length;
+      let respondidas = 0;
+      
+      _quizAtivo.questoesSelecionadas.forEach(q => {
+        const el = document.querySelector(`input[name="q_${q.id}"]:checked`);
+        if (el) { respondidas++; if(el.value === q.resposta) acertos++; }
+      });
+
+      if (respondidas < total) { return toast('Responda todas as perguntas!', 'aviso'); }
+
+      document.getElementById('modalQuiz').classList.remove('show');
+
+      if (acertos === total) {
+        // GABARITOU - APROVADO!
+        op.pontos = (op.pontos || 0) + 15; salvarOperadoresLocal(true);
+        iniciarSessao(op, postoNome);
+        toast(`🎉 PARABÉNS! ${op.nome} gabaritou e a máquina está LIBERADA (${postoNome})`, 'sucesso');
+        dispararEmailGame(op, "Aprovado no Game On-The-Job (Renovação Emergencial)", postoNome);
+      } else {
+        // ERROU - REPROVADO!
+        op.pontos = (op.pontos || 0) - 10; salvarOperadoresLocal(true);
+        if (sessaoAtiva) encerrarSessao('manual', false);
+        atualizarPainelEsteira('bloqueado', op.nome, postoNome);
+        sendSerialCommand("BLOQUEAR\n");
+        document.getElementById('esteiraOpSub').textContent = `Reprovou no Quiz! Necessita Reciclagem.`;
+        adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} Reprovou no Jogo (${postoNome})`);
+        toast(`❌ ${op.nome} REPROVOU no Quiz. Máquina bloqueada!`, 'erro');
+        dispararEmailGame(op, "Reprovou no Game - Requer Reciclagem Profunda!", postoNome);
+      }
+      setTimeout(() => { document.getElementById('resultado').style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
+    }
+
     let firebaseDisponivel = false;
     let firebaseApi = null;
 
@@ -1888,6 +2072,7 @@
       }
     }
 
+    inicializarQuestoes();
     function carregarOperadoresLocal() {
       try {
         operadores = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -2235,6 +2420,17 @@
         iniciarSessao(op, qual.postoNome || postoNome);
         toast(`✅ ${op.nome} — MÁQUINA LIBERADA por ${getTurnoLabel()} (${postoNome})`, 'sucesso');
       } else {
+        const pNome = qual.postoNome || postoNome;
+        const qs = questoes.filter(q => q.posto === 'Geral' || q.posto === pNome);
+        if (qs.length > 0) {
+            document.getElementById('resultado').className = 'apto';
+            document.getElementById('status').innerText = '🎮 Avaliação Game';
+            document.getElementById('validade').innerHTML = '<strong>Atenção:</strong> Responda às perguntas para liberar o posto.';
+            toast('Iniciando Prova de Conhecimento...', 'info');
+            iniciarQuiz(op, pNome, qs, qual);
+            return;
+        }
+
         op.pontos = (op.pontos || 0) - 5; salvarOperadoresLocal(true);
         if (sessaoAtiva) encerrarSessao('manual', false);
         atualizarPainelEsteira('bloqueado', op.nome, postoNome);
@@ -2815,6 +3011,9 @@
       if (aba === 'gamificacao') {
         renderizarDashboard();
       }
+      if (aba === 'perguntas') {
+        renderizarPerguntas();
+      }
     }
 
     let dashCharts = {};
@@ -2925,6 +3124,9 @@
     }
 
     window.mudarAbaAdmin = mudarAbaAdmin;
+    window.adicionarPergunta = adicionarPergunta;
+    window.excluirPergunta = excluirPergunta;
+    window.finalizarQuiz = finalizarQuiz;
     window.cadastrar = cadastrar;
     window.editar = abrirModal;
     window.excluirOperador = excluirOperador;
