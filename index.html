@@ -1287,6 +1287,8 @@
         </div>
       </div>
 
+      </div>
+
       <!-- ABA 3: GAMIFICAÇÃO (ON THE JOB) -->
       <div id="view-gamificacao" class="admin-view">
         
@@ -1300,15 +1302,15 @@
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
           <div class="card" style="text-align: center; border-top: 4px solid var(--green); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Liberações Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
+            <div id="dashLiberacoes" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
           <div class="card" style="text-align: center; border-top: 4px solid var(--red); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Bloqueios Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
+            <div id="dashBloqueios" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
           <div class="card" style="text-align: center; border-top: 4px solid var(--accent); padding: 20px;">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Encerramento Geral</h3>
-            <div style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
+            <div id="dashEncerramentos" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
         </div>
 
@@ -1336,6 +1338,7 @@
                 <th>Código</th>
                 <th>Nome do Operador</th>
                 <th>Status (On the Job)</th>
+                <th>Pontuação</th>
               </tr>
             </thead>
             <tbody id="tabelaGamificacao">
