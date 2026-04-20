@@ -1092,15 +1092,15 @@
 
     <!-- KPIs -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-      <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center">
+      <div class="dash-card-btn" style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center;cursor:pointer;" onclick="abrirModalDashDetalhes('verde')">
         <div style="font-size:1.8rem;font-weight:700;color:var(--green)" id="kpiLiberacoes">0</div>
         <div style="font-size:0.75rem;color:var(--green);margin-top:2px">✅ Liberações</div>
       </div>
-      <div style="background:var(--red-bg);border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center">
+      <div class="dash-card-btn" style="background:var(--red-bg);border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center;cursor:pointer;" onclick="abrirModalDashDetalhes('vermelho')">
         <div style="font-size:1.8rem;font-weight:700;color:var(--red)" id="kpiBloqueios">0</div>
         <div style="font-size:0.75rem;color:var(--red);margin-top:2px">🔴 Bloqueios</div>
       </div>
-      <div style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:10px;padding:16px;text-align:center">
+      <div class="dash-card-btn" style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:10px;padding:16px;text-align:center;cursor:pointer;" onclick="abrirModalDashDetalhes('amarelo')">
         <div style="font-size:1.8rem;font-weight:700;color:var(--yellow)" id="kpiEncerramentos">0</div>
         <div style="font-size:0.75rem;color:var(--yellow);margin-top:2px">⏹ Encerramentos</div>
       </div>
