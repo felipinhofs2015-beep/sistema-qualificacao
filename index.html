@@ -980,7 +980,8 @@
         display: none;
       }
     }
-  </style>
+    .dash-card-btn:hover { transform: scale(1.02);  background: var(--surface2); }
+</style>
 </head>
 
 <body>
@@ -1301,15 +1302,15 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
-          <div class="card" style="text-align: center; border-top: 4px solid var(--green); padding: 20px;">
+          <div class="card dash-card-btn" style="text-align: center; border-top: 4px solid var(--green); padding: 20px; cursor: pointer; transition: transform 0.2s;" onclick="abrirModalDashDetalhes('verde')">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Liberações Geral</h3>
             <div id="dashLiberacoes" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
-          <div class="card" style="text-align: center; border-top: 4px solid var(--red); padding: 20px;">
+          <div class="card dash-card-btn" style="text-align: center; border-top: 4px solid var(--red); padding: 20px; cursor: pointer; transition: transform 0.2s;" onclick="abrirModalDashDetalhes('vermelho')">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Bloqueios Geral</h3>
             <div id="dashBloqueios" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
-          <div class="card" style="text-align: center; border-top: 4px solid var(--accent); padding: 20px;">
+          <div class="card dash-card-btn" style="text-align: center; border-top: 4px solid var(--accent); padding: 20px; cursor: pointer; transition: transform 0.2s;" onclick="abrirModalDashDetalhes('amarelo')">
             <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px; border:none;">Encerramento Geral</h3>
             <div id="dashEncerramentos" style="font-size: 2.2rem; font-weight: 700; color: var(--text);">0</div>
           </div>
@@ -1473,6 +1474,33 @@
 
   <!-- Toast -->
   <div id="toast"></div>
+
+  <!-- Modal Dashboard Detalhes -->
+  <div class="modal-overlay" id="modalDashDetalhes">
+    <div class="modal" style="max-width:800px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 id="modalDashTitulo" style="font-size:1.4rem; font-weight:700;">📋 Detalhamento</h3>
+        <button class="btn btn-secondary" style="padding:4px 12px;" onclick="fecharModalDashDetalhes()">X</button>
+      </div>
+      <p id="modalDashSub" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Visualização extraída conforme especificações solicitadas.</p>
+      
+      <div style="max-height: 450px; overflow-y: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="background:var(--surface2); border-bottom: 2px solid var(--border);">
+              <th style="padding:10px;">Data / Hora</th>
+              <th style="padding:10px;">Operador Correlacionado</th>
+              <th style="padding:10px;">Especificação da Ocorrência</th>
+            </tr>
+          </thead>
+          <tbody id="modalDashTbody">
+            <!-- JS fills this -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modal Quiz On-The-Job -->
   <div class="modal-overlay" id="modalQuiz">
@@ -3020,6 +3048,61 @@
 
     let dashCharts = {};
     const mesesNome = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+    
+    function abrirModalDashDetalhes(filtroCor) {
+      const modal = document.getElementById('modalDashDetalhes');
+      const titulo = document.getElementById('modalDashTitulo');
+      const tbody = document.getElementById('modalDashTbody');
+      
+      if(filtroCor === 'verde') { titulo.innerText = '🟢 Liberações Oficiais'; titulo.style.color = 'var(--green)'; }
+      else if(filtroCor === 'vermelho') { titulo.innerText = '🔴 Tentativas Bloqueadas'; titulo.style.color = 'var(--red)'; }
+      else if(filtroCor === 'amarelo') { titulo.innerText = '🔸 Encerramentos e Validações'; titulo.style.color = 'var(--accent)'; }
+      
+      tbody.innerHTML = '';
+      
+      try {
+        const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+        const filtrados = entradas.filter(e => e.cor === filtroCor);
+        
+        if(filtrados.length === 0) {
+           tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color:var(--text-muted);">Nenhum registro encontrado nesta categoria.</td></tr>';
+        } else {
+           filtrados.forEach(e => {
+             // Basic regex parsing to separate the operator name logically if possible
+             let specStr = e.msg || "";
+             let operador = "Não identificado";
+             
+             // Extrair operador dos modelos de string mais comuns
+             const parts = specStr.split('—');
+             if(parts.length > 1) {
+                const afterDash = parts[1].trim();
+                const opNameMatch = afterDash.split(' ')[0]; // O nome costuma ser a primeira palavra dps do traço
+                if(opNameMatch !== "Turno") operador = afterDash.replace(/\(.*?\)/g, '').trim(); 
+             } else if(specStr.includes('manualmente (')) {
+                operador = specStr.split('manualmente (')[1].replace(')', '');
+             }
+             
+             tbody.innerHTML += `
+               <tr style="border-bottom: 1px solid var(--border);">
+                 <td style="padding:10px; font-size:0.85rem; color:var(--text-muted);">${new Date(e.ts || Date.now()).toLocaleDateString('pt-BR')} <br> <strong style="color:var(--text);">${e.hora}</strong></td>
+                 <td style="padding:10px; font-weight:600; color:${titulo.style.color};">${operador.substring(0, 25)}...</td>
+                 <td style="padding:10px; font-size:0.85rem;">${specStr}</td>
+               </tr>
+             `;
+           });
+        }
+      } catch(e) { console.error('Erro ao listar dash', e); }
+      
+      modal.classList.add('show');
+    }
+    
+    function fecharModalDashDetalhes() {
+      document.getElementById('modalDashDetalhes').classList.remove('show');
+    }
+    
+    window.abrirModalDashDetalhes = abrirModalDashDetalhes;
+    window.fecharModalDashDetalhes = fecharModalDashDetalhes;
 
     function renderizarDashboard() {
       const dataAtual = new Date();
