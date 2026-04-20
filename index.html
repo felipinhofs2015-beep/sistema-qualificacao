@@ -1483,6 +1483,7 @@
         <button class="btn btn-secondary" style="padding:4px 12px;" onclick="fecharModalDashDetalhes()">X</button>
       </div>
       <p id="modalDashSub" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Visualização extraída conforme especificações solicitadas.</p>
+      <input type="text" id="modalDashSearch" placeholder="🔍 Pesquisar por operador, máquina ou ocorrência..." style="width: 100%; padding: 10px 14px; margin-bottom: 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.95rem; box-sizing: border-box;" onkeyup="filtrarModalDash(this.value)">
       
       <div style="max-height: 450px; overflow-y: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left;">
@@ -3060,6 +3061,8 @@
       else if(filtroCor === 'amarelo') { titulo.innerText = '🔸 Encerramentos e Validações'; titulo.style.color = 'var(--accent)'; }
       
       tbody.innerHTML = '';
+      const searchEl = document.getElementById('modalDashSearch');
+      if(searchEl) searchEl.value = '';
       
       try {
         const entradas = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
@@ -3103,6 +3106,21 @@
     
     window.abrirModalDashDetalhes = abrirModalDashDetalhes;
     window.fecharModalDashDetalhes = fecharModalDashDetalhes;
+
+    function filtrarModalDash(termo) {
+      termo = termo.toLowerCase();
+      const rows = document.getElementById('modalDashTbody').getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].cells.length === 1) continue; 
+        const textoLinha = rows[i].innerText.toLowerCase();
+        if (textoLinha.includes(termo)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+    window.filtrarModalDash = filtrarModalDash;
 
     function renderizarDashboard() {
       const dataAtual = new Date();
