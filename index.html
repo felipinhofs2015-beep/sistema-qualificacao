@@ -1476,7 +1476,7 @@
         administração.</p>
       <div class="form-group">
         <label>Senha</label>
-        <input type="password" id="inputSenhaAdmin" placeholder="••••••••" autocomplete="current-password">
+        <input type="password" id="inputSenhaAdmin" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key === 'Enter') confirmarSenhaAdmin()">
       </div>
       <div id="senhaErro" style="color:var(--red);font-size:0.8rem;margin-top:-8px;margin-bottom:8px;display:none">❌
         Senha incorreta</div>
