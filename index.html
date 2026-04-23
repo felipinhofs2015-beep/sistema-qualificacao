@@ -3362,6 +3362,21 @@ window.renderizarTeiaOperador = renderizarTeiaOperador;
     let port;
     let writer;
 
+    if ("serial" in navigator) {
+      navigator.serial.addEventListener("disconnect", (event) => {
+        toast("⚠️ Máquina Desconectada fisicamente!", "aviso");
+        port = null;
+        writer = null;
+        const btn = document.getElementById("btnConnectSerial");
+        if(btn) {
+          btn.innerHTML = "🔌 <span>Conectar Máquina</span>";
+          btn.style.background = "";
+          btn.style.borderColor = "var(--accent)";
+          btn.style.color = "var(--accent)";
+        }
+      });
+    }
+
     async function connectSerial() {
       if (!("serial" in navigator)) {
         toast("❌ Seu navegador não suporta comunicação Web Serial. Use Chrome, Edge ou Opera.", "erro");
