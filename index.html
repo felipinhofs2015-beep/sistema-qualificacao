@@ -3258,7 +3258,8 @@
 }
 
 function renderizarTeiaOperador(codigoOp) {
-    const op = operadores[codigoOp];
+    const opLista = Object.values(operadores);
+    const op = opLista.find(o => o.codigo === codigoOp) || operadores[codigoOp];
     if (!op) {
         toast("Operador não encontrado na memória!", "erro");
         return;
