@@ -3166,8 +3166,17 @@
                Object.values(op.qualificacoes).forEach(q => { pStatusList.push(diasAte(q.validade)); });
             } else { pStatusList.push(-999); }
         } else {
-            if (op.qualificacoes && op.qualificacoes[filtroSetor]) {
-                pStatusList.push(diasAte(op.qualificacoes[filtroSetor].validade));
+            let qualValidade = null;
+            if (op.qualificacoes) {
+                if (Array.isArray(op.qualificacoes)) {
+                    const q = op.qualificacoes.find(x => x.postoNome === filtroSetor);
+                    if (q) qualValidade = q.validade;
+                } else if (op.qualificacoes[filtroSetor]) {
+                    qualValidade = op.qualificacoes[filtroSetor].validade;
+                }
+            }
+            if (qualValidade) {
+                pStatusList.push(diasAte(qualValidade));
             } else { pStatusList.push(-999); }
         }
 
