@@ -3163,7 +3163,20 @@
 
         if (filtroSetor === 'todos') {
             if(op.qualificacoes && Object.keys(op.qualificacoes).length > 0) {
-               Object.values(op.qualificacoes).forEach(q => { pStatusList.push(diasAte(q.validade)); });
+               Object.values(op.qualificacoes).forEach(q => { pStatusList.push(diasAte(q.validade || q.data || q)); });
+            } else { pStatusList.push(-999); }
+        } else {
+            let qualValidade = null;
+            if (op.qualificacoes) {
+                if (Array.isArray(op.qualificacoes)) {
+                    const q = op.qualificacoes.find(x => x.postoNome === filtroSetor);
+                    if (q) qualValidade = q.validade;
+                } else if (op.qualificacoes[filtroSetor]) {
+                    qualValidade = op.qualificacoes[filtroSetor].validade;
+                }
+            }
+            if (qualValidade) {
+                pStatusList.push(diasAte(qualValidade));
             } else { pStatusList.push(-999); }
         } else {
             let qualValidade = null;
@@ -3285,8 +3298,17 @@ function renderizarTeiaOperador(codigoOp) {
     } else {
         postos.forEach(p => {
             rotulosRadar.push(p.nome);
-            if (op.qualificacoes && op.qualificacoes[p.nome]) {
-                const dias = diasAte(op.qualificacoes[p.nome].validade);
+            let qualValidade = null;
+            if (op.qualificacoes) {
+                if (Array.isArray(op.qualificacoes)) {
+                    const q = op.qualificacoes.find(x => x.postoNome === p.nome);
+                    if (q) qualValidade = q.validade;
+                } else if (op.qualificacoes[p.nome]) {
+                    qualValidade = op.qualificacoes[p.nome].validade;
+                }
+            }
+            if (qualValidade) {
+                const dias = diasAte(qualValidade);
                 if (dias >= 30) pontosRadar.push(100);
                 else if (dias >= 0) pontosRadar.push(50);
                 else pontosRadar.push(0);
