@@ -3259,29 +3259,43 @@
 
 function renderizarTeiaOperador(codigoOp) {
     const op = operadores[codigoOp];
-    if (!op) return;
+    if (!op) {
+        toast("Operador não encontrado na memória!", "erro");
+        return;
+    }
 
-    document.getElementById('radarChartTitle').innerText = 'Versatilidade de: ' + op.nome;
+    const titleEl = document.getElementById('radarChartTitle');
+    if(titleEl) titleEl.innerText = 'Versatilidade de: ' + op.nome;
 
     let rotulosRadar = []; let pontosRadar = [];
-    postos.forEach(p => {
-        rotulosRadar.push(p.nome);
-        if (op.qualificacoes && op.qualificacoes[p.nome]) {
-            const dias = diasAte(op.qualificacoes[p.nome].validade);
-            if (dias >= 30) pontosRadar.push(100);
-            else if (dias >= 0) pontosRadar.push(50);
-            else pontosRadar.push(0);
-        } else { pontosRadar.push(0); }
-    });
+    
+    if (!postos || postos.length === 0) {
+        rotulosRadar = ['Nenhum Posto Criado', 'Nenhum Posto Criado 2', 'Nenhum Posto Criado 3'];
+        pontosRadar = [0, 0, 0];
+    } else {
+        postos.forEach(p => {
+            rotulosRadar.push(p.nome);
+            if (op.qualificacoes && op.qualificacoes[p.nome]) {
+                const dias = diasAte(op.qualificacoes[p.nome].validade);
+                if (dias >= 30) pontosRadar.push(100);
+                else if (dias >= 0) pontosRadar.push(50);
+                else pontosRadar.push(0);
+            } else { pontosRadar.push(0); }
+        });
+    }
 
-    if (dashCharts.radar) dashCharts.radar.destroy();
+    try { if (dashCharts.radar) dashCharts.radar.destroy(); } catch(e){}
     const ctxRadar = document.getElementById('radarChart');
     if (ctxRadar) {
-        dashCharts.radar = new Chart(ctxRadar.getContext('2d'), {
-            type: 'radar',
-            data: { labels: rotulosRadar, datasets: [{ label: 'Nível de Versatilidade', data: pontosRadar, backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#3b82f6' }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: false, max: 100, min: 0, stepSize: 50 } } }, plugins: { legend: { display: false } } }
-        });
+        try {
+            dashCharts.radar = new Chart(ctxRadar.getContext('2d'), {
+                type: 'radar',
+                data: { labels: rotulosRadar, datasets: [{ label: 'Nível de Versatilidade', data: pontosRadar, backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#3b82f6' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: false, max: 100, min: 0, stepSize: 50 } } }, plugins: { legend: { display: false } } }
+            });
+        } catch(err) {
+            console.error("Erro ao gerar teia:", err);
+        }
     }
 }
 window.renderizarTeiaOperador = renderizarTeiaOperador;
