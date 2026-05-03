@@ -2072,8 +2072,11 @@
     }
 
     function diasAte(dataStr) {
+      if (!dataStr) return -999;
       const hoje = new Date();
-      const validade = new Date(dataStr + "T00:00:00");
+      // Ensure we just parse the first 10 characters (YYYY-MM-DD) correctly without timezones messing it up
+      const dataLimpa = dataStr.substring(0, 10);
+      const validade = new Date(dataLimpa + "T00:00:00");
       const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
       const validadeSemHora = new Date(validade.getFullYear(), validade.getMonth(), validade.getDate());
       return Math.round((validadeSemHora - hojeSemHora) / (1000 * 60 * 60 * 24));
