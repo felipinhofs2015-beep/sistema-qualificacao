@@ -3317,7 +3317,7 @@ function renderizarTeiaOperador(codigoOp) {
             dashCharts.radar = new Chart(ctxRadar.getContext('2d'), {
                 type: 'radar',
                 data: { labels: rotulosRadar, datasets: [{ label: 'Nível de Versatilidade', data: pontosRadar, backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#3b82f6' }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: false, max: 100, min: 0, stepSize: 50 } } }, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: true, max: 100, min: 0, stepSize: 25, color: '#94a3b8', backdropColor: 'transparent' } } }, plugins: { legend: { display: false } } }
             });
         } catch(err) {
             console.error("Erro ao gerar teia:", err);
