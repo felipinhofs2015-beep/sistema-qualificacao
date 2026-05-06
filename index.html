@@ -3178,19 +3178,6 @@
             if (qualValidade) {
                 pStatusList.push(diasAte(qualValidade));
             } else { pStatusList.push(-999); }
-        } else {
-            let qualValidade = null;
-            if (op.qualificacoes) {
-                if (Array.isArray(op.qualificacoes)) {
-                    const q = op.qualificacoes.find(x => x.postoNome === filtroSetor);
-                    if (q) qualValidade = q.validade;
-                } else if (op.qualificacoes[filtroSetor]) {
-                    qualValidade = op.qualificacoes[filtroSetor].validade;
-                }
-            }
-            if (qualValidade) {
-                pStatusList.push(diasAte(qualValidade));
-            } else { pStatusList.push(-999); }
         }
 
         const maxDias = Math.max(...pStatusList);
