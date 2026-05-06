@@ -3303,8 +3303,10 @@ function renderizarTeiaOperador(codigoOp) {
             }
             if (qualValidade) {
                 const dias = diasAte(qualValidade);
-                if (dias >= 30) pontosRadar.push(100);
-                else if (dias >= 0) pontosRadar.push(50);
+                if (dias >= 90) pontosRadar.push(100);
+                else if (dias >= 30) pontosRadar.push(75);
+                else if (dias >= 15) pontosRadar.push(50);
+                else if (dias >= 0) pontosRadar.push(25);
                 else pontosRadar.push(0);
             } else { pontosRadar.push(0); }
         });
