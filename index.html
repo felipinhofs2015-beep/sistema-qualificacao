@@ -1272,10 +1272,10 @@
         </p>
 
         <div class="turno-grid">
-          <button class="turno-btn ativo" data-min="240" onclick="selecionarTurno(this,240)">☀️ Manhã<br><small>4h (ex: 08h–12h)</small></button>
+          <button class="turno-btn ativo" data-min="0.5" onclick="selecionarTurno(this,0.5)">⏱️ Teste Rápido<br><small>30 segundos</small></button>
+          <button class="turno-btn" data-min="240" onclick="selecionarTurno(this,240)">☀️ Manhã<br><small>4h (ex: 08h–12h)</small></button>
           <button class="turno-btn" data-min="270" onclick="selecionarTurno(this,270)">🌤️ Tarde<br><small>4h30 (ex: 13h–17h30)</small></button>
-          <button class="turno-btn" data-min="480" onclick="selecionarTurno(this,480)">🌙 Turno Completo<br><small>8h corridas</small></button>
-          <button class="turno-btn" data-min="360" onclick="selecionarTurno(this,360)">🔁 Turno Noite<br><small>6h</small></button>
+          <button class="turno-btn" data-min="480" onclick="selecionarTurno(this,480)">🌙 Completo<br><small>8h corridas</small></button>
         </div>
 
         <div class="turno-custom">
@@ -1435,6 +1435,15 @@
         <div id="editarQualificacoesContainer"></div>
         <button type="button" class="btn-add-email" onclick="adicionarQualificacaoCampoEdicao()">+ Adicionar
           Qualificação</button>
+      </div>
+      <div class="form-group">
+        <label>E-mails dos Supervisores</label>
+        <div id="editarEmailsContainer"></div>
+        <button type="button" class="btn-add-email" onclick="adicionarEmailCampoEdicao()">+ Adicionar E-mail</button>
+      </div>
+      <div class="form-group">
+        <label>Nova Foto (Opcional)</label>
+        <input type="file" id="editarFoto" accept="image/*" class="form-control" style="font-size:0.8rem; background: var(--surface2); padding: 8px; border-radius: 8px; width: 100%; border: 1px solid var(--border); color: var(--text);">
       </div>
       <div class="modal-btns">
         <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
@@ -1676,7 +1685,7 @@
     let firebaseApi = null;
 
     // ── SISTEMA DE TURNO / ESTEIRA ───────────────────────────────
-    let turnoDuracaoSeg = 14400; // padrão: 4h (14400s)
+    let turnoDuracaoSeg = 30; // padrão: 30s
     let sessaoAtiva = null;      // { codigo, nome, postoNome, inicio, fimPrevisto }
     let timerInterval = null;
     const CIRCUNFERENCIA = 2 * Math.PI * 58; // raio do SVG
@@ -2558,6 +2567,17 @@
       atualizarBtnAdicionarEmail();
     }
 
+    function adicionarEmailCampoEdicao(valor = "") {
+      const container = document.getElementById("editarEmailsContainer");
+      const idx = container.querySelectorAll(".email-input-edicao").length + 1;
+      const row = document.createElement("div");
+      row.className = "email-row";
+      row.innerHTML = `
+        <input type="email" class="email-input-edicao" placeholder="email${idx}@empresa.com" value="${valor}">
+        <button type="button" class="btn-remove-email" onclick="removerEmailCampo(this)" title="Remover">✕</button>`;
+      container.appendChild(row);
+    }
+
     // ── Cadastro ─────────────────────────────────────────────────
 
     async function cadastrar() {
@@ -2759,6 +2779,7 @@
       const op = operadores[id];
       document.getElementById("editarId").value = id;
       document.getElementById("editarNome").value = op.nome;
+      document.getElementById("editarFoto").value = "";
 
       const cont = document.getElementById("editarQualificacoesContainer");
       cont.innerHTML = "";
@@ -2766,6 +2787,16 @@
         adicionarQualificacaoCampo("editarQualificacoesContainer", q.postoId, q.validade);
       });
       if ((op.qualificacoes || []).length === 0) adicionarQualificacaoCampoEdicao();
+
+      const contEmail = document.getElementById("editarEmailsContainer");
+      contEmail.innerHTML = "";
+      const emails = Array.isArray(op.emailsResponsaveis) && op.emailsResponsaveis.length > 0 
+        ? op.emailsResponsaveis : (op.emailResponsavel ? [op.emailResponsavel] : []);
+      if (emails.length > 0) {
+        emails.forEach(em => adicionarEmailCampoEdicao(em));
+      } else {
+        adicionarEmailCampoEdicao("");
+      }
 
       document.getElementById("modalEditar").classList.add("show");
     }
@@ -2778,20 +2809,47 @@
       const id = document.getElementById("editarId").value;
       const novoNome = document.getElementById("editarNome").value.trim();
       const novasQuals = lerQualificacoesDoDOM("editarQualificacoesContainer");
+      const novosEmails = [...document.querySelectorAll(".email-input-edicao")]
+        .map(i => i.value.trim()).filter(Boolean);
+      const novaFotoArquivo = document.getElementById("editarFoto").files[0];
 
       if (!novoNome) { toast("Preencha o nome", "aviso"); return; }
       if (novasQuals.length === 0) { toast("Adicione ao menos uma qualificação", "aviso"); return; }
 
-      if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
-        await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), { nome: novoNome, qualificacoes: novasQuals });
-      } else {
-        operadores[id].nome = novoNome;
-        operadores[id].qualificacoes = novasQuals;
-        salvarOperadoresLocal();
-        atualizarLista();
+      const btnSalvar = document.querySelector('#modalEditar .btn-primary');
+      if (btnSalvar) { btnSalvar.disabled = true; btnSalvar.textContent = "Salvando..."; }
+
+      try {
+        let novaFoto = operadores[id].foto;
+        if (novaFotoArquivo) {
+          try {
+            novaFoto = await lerArquivoComoDataURL(novaFotoArquivo);
+          } catch (erroFoto) {
+            console.error("Erro foto:", erroFoto);
+            toast("Erro na foto nova. Mantendo a original.", "aviso");
+          }
+        }
+
+        const payload = { nome: novoNome, qualificacoes: novasQuals, emailsResponsaveis: novosEmails, foto: novaFoto };
+
+        if (firebaseDisponivel && firebaseApi && !String(id).startsWith("local_")) {
+          await firebaseApi.updateDoc(firebaseApi.doc(firebaseApi.db, "funcionarios", id), payload);
+        } else {
+          operadores[id].nome = novoNome;
+          operadores[id].qualificacoes = novasQuals;
+          operadores[id].emailsResponsaveis = novosEmails;
+          operadores[id].foto = novaFoto;
+          salvarOperadoresLocal();
+          atualizarLista();
+        }
+        fecharModal();
+        toast(`Operador "${novoNome}" atualizado!`, "sucesso");
+      } catch (err) {
+        console.error(err);
+        toast("Erro ao salvar", "erro");
+      } finally {
+        if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = "Salvar"; }
       }
-      fecharModal();
-      toast(`Operador "${novoNome}" atualizado!`, "sucesso");
     }
 
     // ── Excluir ───────────────────────────────────────────────────
@@ -3319,7 +3377,7 @@ function renderizarTeiaOperador(codigoOp) {
             dashCharts.radar = new Chart(ctxRadar.getContext('2d'), {
                 type: 'radar',
                 data: { labels: rotulosRadar, datasets: [{ label: 'Nível de Versatilidade', data: pontosRadar, backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#3b82f6' }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: true, max: 100, min: 0, stepSize: 25, color: '#94a3b8', backdropColor: 'transparent' } } }, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#cbd5e1', font: { size: 12 } }, ticks: { display: true, max: 100, min: 0, stepSize: 25, color: '#fff', showLabelBackdrop: false, z: 10, font: { size: 10 } } } }, plugins: { legend: { display: false } } }
             });
         } catch(err) {
             console.error("Erro ao gerar teia:", err);
