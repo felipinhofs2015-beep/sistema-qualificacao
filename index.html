@@ -2520,8 +2520,8 @@
             to_name: email,
             op_nome: op.nome,
             op_codigo: op.codigo,
-            op_validade: `${motivo} (Posto: ${postoNome})`,
-            dias_vencido: diasVencido !== undefined ? diasVencido : "—",
+            vencido_info: diasVencido !== "—" ? `${diasVencido} dia(s)` : "Falta de Qualificação",
+            posto_nome: postoNome,
             from_name: "Sistema de Qualificação"
           };
           emailjs.send("service_yb3a7fh", "template_zs68mzo", params, "hFrtuxVQmksRR0qK-")
