@@ -2458,7 +2458,7 @@
         document.getElementById('esteiraOpSub').textContent = `Sem qualificação para ${postoNome}`;
         adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} sem qualificação para: ${postoNome}`);
         toast(`❌ ${op.nome} — SEM qualificação para ${postoNome}. Máquina bloqueada!`, 'erro');
-        dispararEmailNaoApto(op, "Sem Qualificação", postoNome);
+        dispararEmailNaoApto(op, "Sem Qualificação", postoNome, "—");
         setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
         return;
       }
@@ -2501,13 +2501,13 @@
         document.getElementById('esteiraOpSub').textContent = `Qualificação vencida! (${textoDias})`;
         adicionarLog('vermelho', `❌ Acesso NEGADO — ${op.nome} NÃO APTO para ${postoNome} (${textoDias})`);
         toast(`❌ ${op.nome} — NÃO APTO para ${postoNome}. Esteira bloqueada!`, 'erro');
-        dispararEmailNaoApto(op, "Treinamento Vencido", qual.postoNome || postoNome);
+        dispararEmailNaoApto(op, "Treinamento Vencido", qual.postoNome || postoNome, Math.abs(dias));
       }
 
       setTimeout(() => { resultado.style.display = 'none'; document.getElementById('leitura').focus(); }, 6000);
     }
 
-    function dispararEmailNaoApto(op, motivo, postoNome) {
+    function dispararEmailNaoApto(op, motivo, postoNome, diasVencido) {
       const emails = Array.isArray(op.emailsResponsaveis) && op.emailsResponsaveis.length
         ? op.emailsResponsaveis
         : (op.emailResponsavel ? [op.emailResponsavel] : []);
@@ -2520,8 +2520,8 @@
             to_name: email,
             op_nome: op.nome,
             op_codigo: op.codigo,
-            op_validade: motivo, // adaptando o template para exibir o motivo
-            dias_vencido: postoNome, // adaptando para exibir o posto no email
+            op_validade: `${motivo} (Posto: ${postoNome})`,
+            dias_vencido: diasVencido !== undefined ? diasVencido : "—",
             from_name: "Sistema de Qualificação"
           };
           emailjs.send("service_yb3a7fh", "template_zs68mzo", params, "hFrtuxVQmksRR0qK-")
